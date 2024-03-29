@@ -3,7 +3,6 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/Fernando-Dourado/harness-move-project/model"
 )
@@ -19,7 +18,7 @@ type ServiceContext struct {
 	targetProject string
 }
 
-func NewServiceContext(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) ServiceContext {
+func NewServiceOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) ServiceContext {
 	return ServiceContext{
 		api:           api,
 		sourceOrg:     sourceOrg,
@@ -96,18 +95,7 @@ func (api *ApiRequest) createService(service *model.CreateServiceRequest) error 
 		return err
 	}
 	if resp.IsError() {
-		result := model.ErrorResponse{}
-		err = json.Unmarshal(resp.Body(), &result)
-		if err != nil {
-			return err
-		}
-		if result.Code == "DUPLICATE_FIELD" {
-			return nil
-		}
-		if strings.Contains(result.Message, "already exists") {
-			return nil
-		}
-		return fmt.Errorf("%s: %s", result.Code, result.Message)
+		return handleCreateErrorResponse(resp)
 	}
 
 	return nil

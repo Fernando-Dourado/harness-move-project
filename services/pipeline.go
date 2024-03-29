@@ -19,7 +19,7 @@ type PipelineContext struct {
 	targetProject string
 }
 
-func NewPipelineContext(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) PipelineContext {
+func NewPipelineOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) PipelineContext {
 	return PipelineContext{
 		api:           api,
 		sourceOrg:     sourceOrg,
@@ -128,15 +128,7 @@ func (api *ApiRequest) createPipeline(org, project, yaml string) error {
 		return err
 	}
 	if resp.IsError() {
-		result := model.ErrorResponse{}
-		err = json.Unmarshal(resp.Body(), &result)
-		if err != nil {
-			return err
-		}
-		if result.Code == "DUPLICATE_FIELD" {
-			return nil
-		}
-		return fmt.Errorf("%s: %s", result.Code, result.Message)
+		return handleCreateErrorResponse(resp)
 	}
 
 	return nil

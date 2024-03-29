@@ -41,8 +41,9 @@ func (o *Move) Exec() error {
 	}
 
 	var operations []services.Operation
-	operations = append(operations, services.NewPipelineContext(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
-	operations = append(operations, services.NewServiceContext(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewPipelineOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewServiceOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewTemplateOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
 
 	for _, op := range operations {
 		if err := op.Move(); err != nil {
