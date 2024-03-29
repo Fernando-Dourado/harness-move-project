@@ -42,7 +42,7 @@ func main() {
 		cli.StringFlag{
 			Name:     "target-project",
 			Usage:    "TODO: Explain the arg usage",
-			Required: true,
+			Required: false,
 		},
 	}
 	app.Run(os.Args)
@@ -63,8 +63,18 @@ func run(c *cli.Context) {
 			Project: c.String("target-project"),
 		},
 	}
+
+	applyArgumentRules(&mv)
+
 	if err := mv.Exec(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
+	}
+}
+
+func applyArgumentRules(mv *operation.Move) {
+	// USE SOURCE PROJECT AS TARGET, WHEN TARGET NOT SET
+	if len(mv.Target.Project) == 0 {
+		mv.Target.Project = mv.Source.Project
 	}
 }
