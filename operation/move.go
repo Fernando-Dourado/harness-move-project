@@ -11,7 +11,7 @@ type (
 		Account string
 	}
 
-	// NOT SURE OF WHICH NAME TO CHOSE TO THAT TYPE
+	// NOT SURE WHICH NAME TO CHOSE TO THAT TYPE
 	NoName struct {
 		Org     string
 		Project string
@@ -40,8 +40,15 @@ func (o *Move) Exec() error {
 		return err
 	}
 
-	// list pipelines
-	// extract pipeline yamls
+	var operations []services.Operation
+	operations = append(operations, services.NewPipelineContext(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewServiceContext(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+
+	for _, op := range operations {
+		if err := op.Move(); err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
