@@ -1,6 +1,8 @@
 package operation
 
 import (
+	"fmt"
+
 	"github.com/Fernando-Dourado/harness-move-project/services"
 	"github.com/go-resty/resty/v2"
 )
@@ -41,10 +43,10 @@ func (o *Move) Exec() error {
 	}
 
 	var operations []services.Operation
-	operations = append(operations, services.NewPipelineOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewEnvironmentOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
 	operations = append(operations, services.NewServiceOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
 	operations = append(operations, services.NewTemplateOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
-	operations = append(operations, services.NewEnvironmentOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewPipelineOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
 
 	for _, op := range operations {
 		if err := op.Move(); err != nil {
@@ -52,5 +54,6 @@ func (o *Move) Exec() error {
 		}
 	}
 
+	fmt.Println("Done")
 	return nil
 }
