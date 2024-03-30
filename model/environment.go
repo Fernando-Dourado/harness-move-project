@@ -17,10 +17,10 @@ type ListEnvironmentData struct {
 }
 
 type ListEnvironmentContent struct {
-	Environment ListEnvironment `json:"environment"`
+	Environment Environment `json:"environment"`
 }
 
-type ListEnvironment struct {
+type Environment struct {
 	Account           string    `json:"accountId"`
 	OrgIdentifier     string    `json:"orgIdentifier"`
 	ProjectIdentifier string    `json:"projectIdentifier"`

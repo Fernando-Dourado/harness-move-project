@@ -76,6 +76,9 @@ func (api *ApiRequest) listEnvironments(org, project string) ([]*model.ListEnvir
 	if err != nil {
 		return nil, err
 	}
+	if resp.IsError() {
+		return nil, handleErrorResponse(resp)
+	}
 
 	result := model.ListEnvironmentResponse{}
 	err = json.Unmarshal(resp.Body(), &result)

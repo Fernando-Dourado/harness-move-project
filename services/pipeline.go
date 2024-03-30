@@ -74,7 +74,7 @@ func (api *ApiRequest) listPipelines(org, project string) ([]*model.PipelineList
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf(resp.Status())
+		return nil, handleErrorResponse(resp)
 	}
 
 	result := model.PipelineListResult{}
