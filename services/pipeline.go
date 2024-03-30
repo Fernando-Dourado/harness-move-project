@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Fernando-Dourado/harness-move-project/model"
+	"github.com/schollz/progressbar/v3"
 )
 
 const LIST_PIPELINES = "/pipeline/api/pipelines/list"
@@ -36,23 +37,23 @@ func (c PipelineContext) Move() error {
 		return err
 	}
 
+	bar := progressbar.Default(int64(len(pipelines)), "Pipelines   ")
+	var failed []string
+
 	for _, pipe := range pipelines {
 		pipeData, err := c.api.getPipeline(c.sourceOrg, c.sourceProject, pipe.Identifier)
+		if err == nil {
+			newYaml := createYaml(pipeData.YAMLPipeline, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
+			err = c.api.createPipeline(c.targetOrg, c.targetProject, newYaml)
+		}
 		if err != nil {
-			return err
+			failed = append(failed, fmt.Sprintln(pipe.Name, "-", err.Error()))
 		}
-
-		if !pipeData.EntityValidityDetails.Valid {
-			// log warn as pipeline YAML is invalid
-			continue
-		}
-
-		newYaml := createYaml(pipeData.YAMLPipeline, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
-		if err := c.api.createPipeline(c.targetOrg, c.targetProject, newYaml); err != nil {
-			return err
-		}
+		bar.Add(1)
 	}
+	bar.Finish()
 
+	reportFailed(failed, "pipelines:")
 	return nil
 }
 
@@ -100,7 +101,7 @@ func (api *ApiRequest) getPipeline(org, project, pipeIdentifier string) (*model.
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf(resp.Status())
+		return nil, handleErrorResponse(resp)
 	}
 
 	result := model.PipelineGetResult{}
@@ -128,7 +129,7 @@ func (api *ApiRequest) createPipeline(org, project, yaml string) error {
 		return err
 	}
 	if resp.IsError() {
-		return handleCreateErrorResponse(resp)
+		return handleErrorResponse(resp)
 	}
 
 	return nil

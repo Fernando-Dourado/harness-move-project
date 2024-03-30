@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Fernando-Dourado/harness-move-project/model"
+	"github.com/schollz/progressbar/v3"
 )
 
 const LIST_SERVICES = "/ng/api/servicesV2"
@@ -35,6 +36,9 @@ func (c ServiceContext) Move() error {
 		return err
 	}
 
+	bar := progressbar.Default(int64(len(services)), "Services    ")
+	var failed []string
+
 	for _, s := range services {
 		newYaml := createYaml(s.Service.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
 		service := &model.CreateServiceRequest{
@@ -46,10 +50,13 @@ func (c ServiceContext) Move() error {
 			Yaml:              newYaml,
 		}
 		if err := c.api.createService(service); err != nil {
-			return err
+			failed = append(failed, fmt.Sprintln(s.Service.Name, "-", err.Error()))
 		}
+		bar.Add(1)
 	}
+	bar.Finish()
 
+	reportFailed(failed, "services:")
 	return nil
 }
 
@@ -95,7 +102,7 @@ func (api *ApiRequest) createService(service *model.CreateServiceRequest) error 
 		return err
 	}
 	if resp.IsError() {
-		return handleCreateErrorResponse(resp)
+		return handleErrorResponse(resp)
 	}
 
 	return nil

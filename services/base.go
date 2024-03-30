@@ -28,7 +28,7 @@ func createYaml(yaml, sourceOrg, sourceProject, targetOrg, targetProject string)
 	return out
 }
 
-func handleCreateErrorResponse(resp *resty.Response) error {
+func handleErrorResponse(resp *resty.Response) error {
 	result := model.ErrorResponse{}
 	err := json.Unmarshal(resp.Body(), &result)
 	if err != nil {
@@ -40,5 +40,16 @@ func handleCreateErrorResponse(resp *resty.Response) error {
 	if strings.Contains(result.Message, "already exists") {
 		return nil
 	}
-	return fmt.Errorf("%s: %s", result.Code, result.Message)
+	return fmt.Errorf("%s: %s", result.Code, removeNewLine(result.Message))
+}
+
+func removeNewLine(value string) string {
+	return strings.ReplaceAll(value, "\n", "")
+}
+
+func reportFailed(failed []string, description string) {
+	if len(failed) > 0 {
+		fmt.Println("Failed", description, len(failed))
+		fmt.Println(strings.Join(failed, "\n"))
+	}
 }

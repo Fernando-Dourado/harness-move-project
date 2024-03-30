@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Fernando-Dourado/harness-move-project/model"
+	"github.com/schollz/progressbar/v3"
 )
 
 const LIST_TEMPLATES_ENDPOINT = "/v1/orgs/{org}/projects/{project}/templates"
@@ -36,18 +37,23 @@ func (c TemplateContext) Move() error {
 		return err
 	}
 
+	bar := progressbar.Default(int64(len(templates)), "Templates   ")
+	var failed []string
+
 	for _, template := range templates {
 		t, err := c.api.getTemplate(c.sourceOrg, c.sourceProject, template.Identifier, template.VersionLabel)
+		if err == nil {
+			newYaml := createYaml(t.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
+			err = c.api.createTemplate(c.targetOrg, c.targetProject, newYaml)
+		}
 		if err != nil {
-			return err
+			failed = append(failed, fmt.Sprintln(template.Name, "-", err.Error()))
 		}
-
-		newYaml := createYaml(t.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
-		if err := c.api.createTemplate(c.targetOrg, c.targetProject, newYaml); err != nil {
-			return err
-		}
+		bar.Add(1)
 	}
+	bar.Finish()
 
+	reportFailed(failed, "templates:")
 	return nil
 }
 
@@ -67,7 +73,7 @@ func (api *ApiRequest) listTemplates(org, project string) (model.TemplateListRes
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf(resp.Status())
+		return nil, handleErrorResponse(resp)
 	}
 
 	result := model.TemplateListResult{}
@@ -97,7 +103,7 @@ func (api *ApiRequest) getTemplate(org, project, templateIdentifier, versionLabe
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf(resp.Status())
+		return nil, handleErrorResponse(resp)
 	}
 
 	result := model.TemplateGetResult{}
@@ -125,7 +131,7 @@ func (api *ApiRequest) createTemplate(org, project, yaml string) error {
 		return err
 	}
 	if resp.IsError() {
-		return handleCreateErrorResponse(resp)
+		return handleErrorResponse(resp)
 	}
 
 	return nil

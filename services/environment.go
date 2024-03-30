@@ -2,8 +2,10 @@ package services
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/Fernando-Dourado/harness-move-project/model"
+	"github.com/schollz/progressbar/v3"
 )
 
 type EnvironmentContext struct {
@@ -31,6 +33,9 @@ func (c EnvironmentContext) Move() error {
 		return nil
 	}
 
+	bar := progressbar.Default(int64(len(envs)), "Environments")
+	var failed []string
+
 	for _, env := range envs {
 		e := env.Environment
 
@@ -46,10 +51,13 @@ func (c EnvironmentContext) Move() error {
 			Yaml:              newYaml,
 		}
 		if err := c.api.createEnvironment(req); err != nil {
-			return err
+			failed = append(failed, fmt.Sprintln(e.Name, "-", err.Error()))
 		}
+		bar.Add(1)
 	}
+	bar.Finish()
 
+	reportFailed(failed, "environments:")
 	return nil
 }
 
@@ -92,7 +100,7 @@ func (api *ApiRequest) createEnvironment(env *model.CreateEnvironmentRequest) er
 		return err
 	}
 	if resp.IsError() {
-		return handleCreateErrorResponse(resp)
+		return handleErrorResponse(resp)
 	}
 
 	return nil

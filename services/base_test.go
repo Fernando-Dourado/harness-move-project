@@ -15,3 +15,12 @@ func TestCreateYaml(t *testing.T) {
 	assert.True(t, strings.Contains(yaml, "orgIdentifier: non_default"), "The orgIdentifier not replaced")
 	assert.True(t, strings.Contains(yaml, "projectIdentifier: DouradoF"), "The projectIdentifier not replaced")
 }
+
+func TestRemoveNewLine(t *testing.T) {
+	v1 := "There are no eligible delegates available in the account to execute the task.\n\n\n"
+	v2 := removeNewLine(v1)
+	assert.Equal(t, "There are no eligible delegates available in the account to execute the task.", v2)
+
+	v3 := removeNewLine(v2)
+	assert.Equal(t, v2, v3)
+}
