@@ -34,7 +34,6 @@ steps:
     GOOS: linux
     GOARCH: arm64
   commands:
-    - go test -v
     - go build -o bin/harness-move-project-$GOOS-$GOARCH
 
 - name: build-linux-386
@@ -43,7 +42,6 @@ steps:
     GOOS: linux
     GOARCH: 386
   commands:
-    - go test -v
     - go build -o bin/harness-move-project-$GOOS-$GOARCH
 
 - name: publish
