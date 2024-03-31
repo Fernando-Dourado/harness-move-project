@@ -28,14 +28,14 @@ steps:
   - go build -o bin/amd64/harness-move-project
   - go test -v
 
-- name: build-darwin-arm64
-  image: golang
-  environment:
-    GOOS: darwin
-    GOARCH: arm64
-  commands:
-  - go build -o bin/arm64/harness-move-project
-  - go test -v
+# - name: build-darwin-arm64
+#   image: golang
+#   environment:
+#     GOOS: darwin
+#     GOARCH: arm64
+#   commands:
+#   - go build -o bin/arm64/harness-move-project
+#   - go test -v
 
 - name: publish
   image: plugins/github-release
