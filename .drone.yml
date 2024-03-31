@@ -7,4 +7,41 @@ steps:
   image: golang
   commands:
   - go build
-  - go test
+  - go test -v
+  when:
+  - push
+
+---
+kind: pipeline
+type: docker
+name: release
+
+steps:
+- name: build-linux-amd64
+  image: golang
+  environment:
+    GOOS: linux
+    GOARCH: amd64
+  commands:
+  - go build -o bin/amd64/harness-move-project
+  - go test -v
+
+- name: build-darwin-arm64
+  image: golang
+  environment:
+    GOOS: darwin
+    GOARCH: arm64
+  commands:
+  - go build -o bin/arm64/harness-move-project
+  - go test -v
+
+- name: publish
+  image: plugins/github-release
+  settings:
+    api_key:
+      from_secret: github
+    files: bin/*
+
+trigger:
+  event:
+    - tag
