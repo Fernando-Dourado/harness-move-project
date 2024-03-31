@@ -20,7 +20,7 @@ name: release
 
 steps:
 - name: build-linux-amd64
-  image: golang
+  image: golang:1.22
   environment:
     GOOS: linux
     GOARCH: amd64
@@ -29,7 +29,7 @@ steps:
     - go build -o bin/harness-move-project-$GOOS-$GOARCH
 
 - name: build-linux-arm64
-  image: golang
+  image: golang:1.22
   environment:
     GOOS: linux
     GOARCH: arm64
@@ -38,7 +38,7 @@ steps:
     - go build -o bin/harness-move-project-$GOOS-$GOARCH
 
 - name: build-linux-386
-  image: golang
+  image: golang:1.22
   environment:
     GOOS: linux
     GOARCH: 386
