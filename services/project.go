@@ -26,7 +26,7 @@ func (api *ApiRequest) ValidateProject(org, project string) error {
 		return err
 	}
 	if resp.IsError() {
-		return fmt.Errorf(resp.Status())
+		return handleErrorResponse(resp)
 	}
 	result := model.ProjectExistResult{}
 	err = json.Unmarshal(resp.Body(), &result)
