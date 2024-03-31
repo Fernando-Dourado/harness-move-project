@@ -42,7 +42,8 @@ steps:
   settings:
     api_key:
       from_secret: github
-    files: bin/*
+    files:
+      - bin/amd64/harness-move-project
 
 trigger:
   event:
