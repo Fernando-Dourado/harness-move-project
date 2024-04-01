@@ -5,12 +5,16 @@ import (
 	"os"
 
 	"github.com/Fernando-Dourado/harness-move-project/operation"
+	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )
 
+var Version = "development"
+
 func main() {
 	app := cli.NewApp()
-	app.Name = "Harness Move"
+	app.Name = "harness-move-project"
+	app.Version = Version
 	app.Usage = "Non-official Harness CLI to move project between organizations"
 	app.Action = run
 	app.Flags = []cli.Flag{
@@ -67,7 +71,7 @@ func run(c *cli.Context) {
 	applyArgumentRules(&mv)
 
 	if err := mv.Exec(); err != nil {
-		fmt.Println(err)
+		fmt.Println(color.RedString(fmt.Sprint("Failed:", err.Error())))
 		os.Exit(1)
 	}
 }
