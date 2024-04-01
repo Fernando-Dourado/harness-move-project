@@ -42,6 +42,10 @@ When the tool try to create and entity on target project that the same identifie
 - Connectors
 - Service Overrides
 
+## Limitation
+
+- The tool can only fetch 1000 elements of each entity type.
+
 ## Contributions
 
 I am to express my gratitude for inspiration to create this tool.
