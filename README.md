@@ -34,9 +34,13 @@ When the tool try to create and entity on target project that the same identifie
 - Input Sets
 - File Store (Working in progress)
 
-## Unsupported Entities
+## Not Supported Entities
 
 - Secrets
+- Triggers
+- Variables
+- Connectors
+- Service Overrides
 
 ## Contributions
 
