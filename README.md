@@ -5,7 +5,7 @@ An utility tool to copy/clone/move a project.
 ## Requirements
 
 - The tool does not create the org or project target.
-- As safety operation the tool do not delete the source project.
+- As safety operation the tool do not delete the entities from the source project.
 - The `api-key` need to have access to read from the source project and write to the target project.
 
 ## Usage
@@ -32,6 +32,7 @@ When the tool try to create and entity on target project that the same identifie
 - Templates
 - Pipelines
 - Input Sets
+- File Store (Working in progress)
 
 ## Unsupported Entities
 
@@ -41,5 +42,5 @@ When the tool try to create and entity on target project that the same identifie
 
 I am to express my gratitude for inspiration to create this tool.
 
-* [Aleksa Arsic](https://github.com/aleksa11010): Thank you for the inspiration! Your creativity is amazing!
-* Francisco Junior: I appreciate inspiring me to improve. Your guidance was crucial!
+- [Aleksa Arsic](https://github.com/aleksa11010): Thank you for the inspiration! Your creativity is amazing!
+- Francisco Junior: I appreciate inspiring me to improve. Your guidance was crucial!
