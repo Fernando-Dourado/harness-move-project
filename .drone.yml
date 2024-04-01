@@ -52,6 +52,6 @@ steps:
     files:
       - bin/harness-move-project*
 
-trigger:
-  event:
-    - tag
+# trigger:
+#   event:
+#     - tag
