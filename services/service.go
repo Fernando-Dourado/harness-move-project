@@ -76,7 +76,7 @@ func (api *ApiRequest) listServices(org, project string) ([]*model.ServiceListCo
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf(resp.Status())
+		return nil, handleErrorResponse(resp)
 	}
 
 	result := model.ServiceListResult{}

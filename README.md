@@ -26,6 +26,7 @@ When the tool try to create and entity on target project that the same identifie
 
 ## Supported Entities
 
+- Variables
 - Environments
 - Infrastructure Definition
 - Services
@@ -38,7 +39,6 @@ When the tool try to create and entity on target project that the same identifie
 
 - Secrets
 - Triggers
-- Variables
 - Connectors
 - Service Overrides
 
