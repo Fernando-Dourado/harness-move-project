@@ -20,7 +20,7 @@ type GetRoletData struct {
 
 type RoleListContent struct {
 	RoleAssignment *RoleAssignmentContent `json:"roleAssignment"`
-	CreatedAt      *RoleAssignmentScope   `json:"scope"`
+	Scope      *RoleAssignmentScope   `json:"scope"`
 	LastModifiedAt int64                  `json:"lastModifiedAt"`
 	HarnessManaged bool                   `json:"harnessManaged"`
 }
@@ -45,10 +45,4 @@ type RoleAssignmentScope struct {
 	AccountIdentifier string `json:"accountIdentifier"`
 	OrgIdentifier     string `json:"orgIdentifier"`
 	ProjectIdentifier string `json:"projectIdentifier"`
-}
-
-type Role struct {
-	OrgIdentifier string `json:"orgIdentifier"`
-	Identifier    string `json:"identifier"`
-	Name          string `json:"name"`
 }
