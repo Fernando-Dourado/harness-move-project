@@ -2,7 +2,7 @@ package	services
 
 import (
 	"encoding/json"
-	// "fmt"
+	//"fmt"
 
 	"github.com/jf781/harness-move-project/model"
 	// "github.com/schollz/progressbar/v3"
@@ -28,14 +28,15 @@ func NewAccessControlOperation(api *ApiRequest, sourceOrg, sourceProject, target
 	}
 }
 
-func (c RoleContext) Move() error {
+func (c RoleContext) Move() (error) {
 
 	roles, err := c.api.ListRoles(c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return err
 	}
 
-	return roles
+	report(roles)
+	return nil
 }
 
 func (api *ApiRequest) ListRoles(org, project string) ([]*model.RoleListContent, error) {

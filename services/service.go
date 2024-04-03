@@ -36,6 +36,9 @@ func (c ServiceContext) Move() error {
 		return err
 	}
 
+	// report(services)
+	// return nil
+
 	bar := progressbar.Default(int64(len(services)), "Services    ")
 	var failed []string
 

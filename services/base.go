@@ -64,3 +64,10 @@ func reportFailed(failed []string, description string) {
 		fmt.Println(strings.Join(failed, "\n"))
 	}
 }
+
+func report(items []*model.RoleListContent) {
+	for _, item := range items {
+		fmt.Printf("Field names: %+v \n", item)
+		// Continue printing other fields of interest
+	}
+}

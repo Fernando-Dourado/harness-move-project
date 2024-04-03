@@ -4,7 +4,7 @@ package model
 
 type GetRoleResponse struct {
 	Status        string        `json:"status"`
-	Data          *GetRoleData `json:"data"`
+	Data          GetRoleData  `json:"data"`
 	CorrelationID string        `json:"correlationId"`
 }
 
@@ -19,8 +19,8 @@ type GetRoleData struct {
 }
 
 type RoleListContent struct {
-	RoleAssignment *RoleAssignmentContent `json:"roleAssignment"`
-	Scope          *RoleAssignmentScope   `json:"scope"`
+	RoleAssignment RoleAssignmentContent `json:"roleAssignment"`
+	Scope          RoleAssignmentScope   `json:"scope"`
 	LastModifiedAt int64                  `json:"lastModifiedAt"`
 	HarnessManaged bool                   `json:"harnessManaged"`
 }
@@ -29,7 +29,7 @@ type RoleAssignmentContent struct {
 	Identifier              string     `json:"identifier"`
 	ResourceGroupIdentifier string     `json:"resourceGroupIdentifier"`
 	RoleIdentifier          string     `json:"roleIdentifier"`
-	Principal               *Principal `json:"principal"`
+	Principal               Principal `json:"principal"`
 	Disabled                bool       `json:"disabled"`
 	Managed                 bool       `json:"managed"`
 	Internal                bool       `json:"internal"`
