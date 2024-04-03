@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Fernando-Dourado/harness-move-project/operation"
 	"github.com/fatih/color"
+	"github.com/jf781/harness-move-project/operation"
 	"github.com/urfave/cli"
 )
 

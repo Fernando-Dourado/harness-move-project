@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/Fernando-Dourado/harness-move-project/operation"
+	"github.com/jf781/harness-move-project/operation"
 	"github.com/stretchr/testify/assert"
 )
 

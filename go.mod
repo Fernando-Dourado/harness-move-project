@@ -1,4 +1,4 @@
-module github.com/Fernando-Dourado/harness-move-project
+module github.com/jf781/harness-move-project
 
 go 1.19
 
