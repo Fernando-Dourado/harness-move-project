@@ -4,11 +4,11 @@ package model
 
 type GetRoleResponse struct {
 	Status        string        `json:"status"`
-	Data          *GetRoletData `json:"data"`
+	Data          *GetRoleData `json:"data"`
 	CorrelationID string        `json:"correlationId"`
 }
 
-type GetRoletData struct {
+type GetRoleData struct {
 	TotalPages    int64              `json:"totalPages"`
 	TotalItems    int64              `json:"totalItems"`
 	PageItemCount int64              `json:"pageItemCount"`
