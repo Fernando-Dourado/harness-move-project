@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Fernando-Dourado/harness-move-project/model"
 	"github.com/go-resty/resty/v2"
+	"github.com/jf781/harness-move-project/model"
 )
 
 const BaseURL = "https://app.harness.io"
