@@ -20,7 +20,7 @@ type GetRoletData struct {
 
 type RoleListContent struct {
 	RoleAssignment *RoleAssignmentContent `json:"roleAssignment"`
-	Scope      *RoleAssignmentScope   `json:"scope"`
+	Scope          *RoleAssignmentScope   `json:"scope"`
 	LastModifiedAt int64                  `json:"lastModifiedAt"`
 	HarnessManaged bool                   `json:"harnessManaged"`
 }
