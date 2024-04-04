@@ -16,6 +16,7 @@ type GetRoleData struct {
 	Content       []*RoleListContent `json:"content"`
 	PageIndex     int64              `json:"pageIndex"`
 	Empty         bool               `json:"empty"`
+	PageToken     interface{}        `json:"pageToken"`
 }
 
 type RoleListContent struct {
