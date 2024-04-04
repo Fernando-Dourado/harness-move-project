@@ -54,9 +54,6 @@ type CreateRoleAssignment struct {
 	ResourceGroupIdentifier string                        `json:"resourceGroupIdentifier"`
 	RoleIdentifier          string                        `json:"roleIdentifier"`
 	Principal               CreateRoleAssignmentPrincipal `json:"principal"`
-	Disabled                bool                          `json:"disabled"`
-	Managed                 bool                          `json:"managed"`
-	Internal                bool                          `json:"internal"`
 	OrgIdentifier           string                        `json:"orgIdentifier"`
 	ProjectIdentifier       string                        `json:"projectIdentifier"`
 }
