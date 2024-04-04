@@ -45,6 +45,7 @@ When the tool try to create and entity on target project that the same identifie
 ## Limitation
 
 - The tool can only fetch 1000 elements of each entity type.
+- Tags are not supported and cannot be copied from the source entity to the target one.
 
 ## Contributions
 
