@@ -7,10 +7,11 @@ An utility tool to copy/clone/move a project.
 - The tool does not create the org or project target.
 - As safety operation the tool do not delete the entities from the source project.
 - The `api-key` need to have access to read from the source project and write to the target project.
+- You can run it multiple times, when the same entity already exists in the target project we ignore it and do not report it as an error.
 
 ## Usage
 
-Execute the operation running at the following command in your terminal
+Execute the operation running that command in your terminal
 
 ```sh
 ./harness-move-project \
@@ -33,7 +34,7 @@ When the tool try to create and entity on target project that the same identifie
 - Templates
 - Pipelines
 - Input Sets
-- File Store (Working in progress)
+- File Store
 
 ## Not Supported Entities
 
