@@ -32,7 +32,7 @@ func NewTemplateOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, 
 
 func (c TemplateContext) Move() error {
 
-	templates, err := c.api.listTemplates(c.sourceOrg, c.sourceProject)
+	templates, err := c.listTemplates(c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return err
 	}
@@ -41,10 +41,10 @@ func (c TemplateContext) Move() error {
 	var failed []string
 
 	for _, template := range templates {
-		t, err := c.api.getTemplate(c.sourceOrg, c.sourceProject, template.Identifier, template.VersionLabel)
+		t, err := c.getTemplate(c.sourceOrg, c.sourceProject, template.Identifier, template.VersionLabel)
 		if err == nil {
 			newYaml := createYaml(t.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
-			err = c.api.createTemplate(c.targetOrg, c.targetProject, newYaml)
+			err = c.createTemplate(c.targetOrg, c.targetProject, newYaml)
 		}
 		if err != nil {
 			failed = append(failed, fmt.Sprintln(template.Name, "-", err.Error()))
@@ -57,8 +57,9 @@ func (c TemplateContext) Move() error {
 	return nil
 }
 
-func (api *ApiRequest) listTemplates(org, project string) (model.TemplateListResult, error) {
+func (c TemplateContext) listTemplates(org, project string) (model.TemplateListResult, error) {
 
+	api := c.api
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").
@@ -85,8 +86,9 @@ func (api *ApiRequest) listTemplates(org, project string) (model.TemplateListRes
 	return result, nil
 }
 
-func (api *ApiRequest) getTemplate(org, project, templateIdentifier, versionLabel string) (*model.TemplateGetData, error) {
+func (c TemplateContext) getTemplate(org, project, templateIdentifier, versionLabel string) (*model.TemplateGetData, error) {
 
+	api := c.api
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").
@@ -115,8 +117,9 @@ func (api *ApiRequest) getTemplate(org, project, templateIdentifier, versionLabe
 	return result.Data, nil
 }
 
-func (api *ApiRequest) createTemplate(org, project, yaml string) error {
+func (c TemplateContext) createTemplate(org, project, yaml string) error {
 
+	api := c.api
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").

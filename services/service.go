@@ -31,7 +31,7 @@ func NewServiceOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, t
 
 func (c ServiceContext) Move() error {
 
-	services, err := c.api.listServices(c.sourceOrg, c.sourceProject)
+	services, err := c.listServices(c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (c ServiceContext) Move() error {
 			Description:       s.Service.Description,
 			Yaml:              newYaml,
 		}
-		if err := c.api.createService(service); err != nil {
+		if err := c.createService(service); err != nil {
 			failed = append(failed, fmt.Sprintln(s.Service.Name, "-", err.Error()))
 		}
 		bar.Add(1)
@@ -60,8 +60,9 @@ func (c ServiceContext) Move() error {
 	return nil
 }
 
-func (api *ApiRequest) listServices(org, project string) ([]*model.ServiceListContent, error) {
+func (c ServiceContext) listServices(org, project string) ([]*model.ServiceListContent, error) {
 
+	api := c.api
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").
@@ -88,8 +89,9 @@ func (api *ApiRequest) listServices(org, project string) ([]*model.ServiceListCo
 	return result.Data.Content, nil
 }
 
-func (api *ApiRequest) createService(service *model.CreateServiceRequest) error {
+func (c ServiceContext) createService(service *model.CreateServiceRequest) error {
 
+	api := c.api
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").
