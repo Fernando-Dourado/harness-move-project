@@ -91,12 +91,12 @@ func (api *ApiRequest) listRoleAssignments(org, project string) ([]*model.Existi
 		return nil, err
 	}
 
-	roles := []*model.ExistingRoleAssignment{}
+	roleAssignments := []*model.ExistingRoleAssignment{}
 	for _, c := range result.Data.Content {
-		roles = append(roles, &c.RoleAssignment)
+		roleAssignments = append(roleAssignments, &c.RoleAssignment)
 	}
 
-	return roles, nil
+	return roleAssignments, nil
 }
 
 func (api *ApiRequest) createRoleAssignment(role *model.NewRoleAssignment) error {
