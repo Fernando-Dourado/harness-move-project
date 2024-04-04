@@ -30,22 +30,22 @@ func NewRoleAssignmentOperation(api *ApiRequest, sourceOrg, sourceProject, targe
 
 func (c RoleAssignmentContext) Move() error {
 
-	roles, err := c.api.listRoleAssignments(c.sourceOrg, c.sourceProject)
+	roleAssignments, err := c.api.listRoleAssignments(c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return err
 	}
 
-	bar := progressbar.Default(int64(len(roles)), "Roles")
+	bar := progressbar.Default(int64(len(roleAssignments)), "Roles")
 	var failed []string
 
-	for _, r := range roles {
+	for _, r := range roleAssignments {
 
-		rolePrincipal := model.RoleAssignmentPrincipal{
+		rolePrincipal := model.NewRoleAssignmentPrincipal{
 			Identifier: r.Principal.Identifier,
 			Type:       r.Principal.Type,
 		}
 
-		role := &model.RoleAssignment{
+		role := &model.NewRoleAssignment{
 			ResourceGroupIdentifier: r.ResourceGroupIdentifier,
 			RoleIdentifier:          r.RoleIdentifier,
 			Principal:               rolePrincipal,
@@ -66,7 +66,7 @@ func (c RoleAssignmentContext) Move() error {
 	return nil
 }
 
-func (api *ApiRequest) listRoleAssignments(org, project string) ([]*model.RoleAssignmentContent, error) {
+func (api *ApiRequest) listRoleAssignments(org, project string) ([]*model.ExistingRoleAssignment, error) {
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
@@ -85,13 +85,13 @@ func (api *ApiRequest) listRoleAssignments(org, project string) ([]*model.RoleAs
 		return nil, handleErrorResponse(resp)
 	}
 
-	result := model.GetRoleResponse{}
+	result := model.GetRoleAssignmentResponse{}
 	err = json.Unmarshal(resp.Body(), &result)
 	if err != nil {
 		return nil, err
 	}
 
-	roles := []*model.RoleAssignmentContent{}
+	roles := []*model.ExistingRoleAssignment{}
 	for _, c := range result.Data.Content {
 		roles = append(roles, &c.RoleAssignment)
 	}
@@ -99,7 +99,7 @@ func (api *ApiRequest) listRoleAssignments(org, project string) ([]*model.RoleAs
 	return roles, nil
 }
 
-func (api *ApiRequest) createRoleAssignment(role *model.RoleAssignment) error {
+func (api *ApiRequest) createRoleAssignment(role *model.NewRoleAssignment) error {
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
