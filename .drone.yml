@@ -6,7 +6,7 @@ steps:
 - name: build
   image: golang
   commands:
-  - go test -v
+  - go test -v ./...
   - go build
 
 trigger:
