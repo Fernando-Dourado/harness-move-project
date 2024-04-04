@@ -67,7 +67,7 @@ func reportFailed(failed []string, description string) {
 
 func report(items []*model.RoleListContent) {
 	for _, item := range items {
-		fmt.Printf("Field names: %+v \n", item)
+		fmt.Printf("Field names: %+v \n", item.RoleAssignment.Principal)
 		// Continue printing other fields of interest
 	}
 }

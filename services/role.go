@@ -1,11 +1,11 @@
-package	services
+package services
 
 import (
 	"encoding/json"
-	//"fmt"
+	"fmt"
 
 	"github.com/jf781/harness-move-project/model"
-	// "github.com/schollz/progressbar/v3"
+	"github.com/schollz/progressbar/v3"
 )
 
 const ROLES = "/authz/api/roleassignments"
@@ -28,18 +28,48 @@ func NewAccessControlOperation(api *ApiRequest, sourceOrg, sourceProject, target
 	}
 }
 
-func (c RoleContext) Move() (error) {
+func (c RoleContext) Move() error {
 
 	roles, err := c.api.ListRoles(c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return err
 	}
 
-	report(roles)
+	// report(roles)
+	// return nil
+
+	bar := progressbar.Default(int64(len(roles)), "Roles")
+	var failed []string
+
+	for _, r := range roles {
+		r.OrgIdentifier = c.targetOrg
+		r.ProjectIdentifier = c.targetProject
+
+		fmt.Printf("Role Assignment: %+v \n", r.Principal)
+
+		err = c.api.CreateRoleAssignment(&model.CreateRoleAssignment{
+			role: CreateRoleAssignment{
+				ResourceGroupIdentifier: r.ResourceGroupIdentifier,
+				Principal:               r.Principal,
+				Disabled:                r.Disabled,
+				Managed:                 r.Managed,
+				Internal:                r.Internal,
+				OrgIdentifier:           r.OrgIdentifier,
+				ProjectIdentifier:       r.ProjectIdentifier,
+			},
+		})
+		if err != nil {
+			failed = append(failed, fmt.Sprintln(r.Identifier, "-", err.Error()))
+		}
+		bar.Add(1)
+	}
+	bar.Finish()
+
+	reportFailed(failed, "Roles:")
 	return nil
 }
 
-func (api *ApiRequest) ListRoles(org, project string) ([]*model.RoleListContent, error) {
+func (api *ApiRequest) ListRoles(org, project string) ([]*model.RoleAssignmentContent, error) {
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
@@ -50,7 +80,7 @@ func (api *ApiRequest) ListRoles(org, project string) ([]*model.RoleListContent,
 			"projectIdentifier": project,
 			"size":              "1000",
 		}).
-		Get(BaseURL + LIST_SERVICES)
+		Get(BaseURL + ROLES)
 	if err != nil {
 		return nil, err
 	}
@@ -64,5 +94,30 @@ func (api *ApiRequest) ListRoles(org, project string) ([]*model.RoleListContent,
 		return nil, err
 	}
 
-	return result.Data.Content, nil
+	roles := []*model.RoleAssignmentContent{}
+	for _, c := range result.Data.Content {
+		roles = append(roles, &c.RoleAssignment)
+	}
+
+	return roles, nil
+}
+
+func (api *ApiRequest) CreateRoleAssignment(role *model.CreateRoleAssignment) error {
+
+	resp, err := api.Client.R().
+		SetHeader("x-api-key", api.Token).
+		SetHeader("Content-Type", "application/json").
+		SetBody(role).
+		SetQueryParams(map[string]string{
+			"accountIdentifier": api.Account,
+		}).
+		Post(BaseURL + ROLES)
+	if err != nil {
+		return err
+	}
+	if resp.IsError() {
+		return handleErrorResponse(resp)
+	}
+
+	return nil
 }

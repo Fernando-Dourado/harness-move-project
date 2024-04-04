@@ -34,6 +34,8 @@ type RoleAssignmentContent struct {
 	Disabled                bool      `json:"disabled"`
 	Managed                 bool      `json:"managed"`
 	Internal                bool      `json:"internal"`
+	OrgIdentifier           string    `json:"orgIdentifier"`
+	ProjectIdentifier       string    `json:"projectIdentifier"`
 }
 
 type Principal struct {
@@ -46,4 +48,13 @@ type RoleAssignmentScope struct {
 	AccountIdentifier string `json:"accountIdentifier"`
 	OrgIdentifier     string `json:"orgIdentifier"`
 	ProjectIdentifier string `json:"projectIdentifier"`
+}
+type CreateRoleAssignment struct {
+	ResourceGroupIdentifier string    `json:"resourceGroupIdentifier"`
+	Principal               Principal `json:"principal"`
+	Disabled                bool      `json:"disabled"`
+	Managed                 bool      `json:"managed"`
+	Internal                bool      `json:"internal"`
+	OrgIdentifier           string    `json:"orgIdentifier"`
+	ProjectIdentifier       string    `json:"projectIdentifier"`
 }
