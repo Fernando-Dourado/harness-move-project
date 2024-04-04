@@ -47,12 +47,12 @@ func (c RoleContext) Move() error {
 			continue
 		}
 
-		rolePrincipal := model.CreateRoleAssignmentPrincipal{
+		rolePrincipal := model.RoleAssignmentPrincipal{
 			Identifier: r.Principal.Identifier,
 			Type:       r.Principal.Type,
 		}
 
-		role := &model.CreateRoleAssignment{
+		role := &model.RoleAssignment{
 			ResourceGroupIdentifier: r.ResourceGroupIdentifier,
 			RoleIdentifier:          r.RoleIdentifier,
 			Principal:               rolePrincipal,
@@ -108,7 +108,7 @@ func (api *ApiRequest) ListRoles(org, project string) ([]*model.RoleAssignmentCo
 	return roles, nil
 }
 
-func (api *ApiRequest) CreateRoleAssignment(role *model.CreateRoleAssignment) error {
+func (api *ApiRequest) CreateRoleAssignment(role *model.RoleAssignment) error {
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).

@@ -50,15 +50,15 @@ type RoleAssignmentScope struct {
 	ProjectIdentifier string `json:"projectIdentifier"`
 }
 
-type CreateRoleAssignment struct {
+type RoleAssignment struct {
 	ResourceGroupIdentifier string                        `json:"resourceGroupIdentifier"`
 	RoleIdentifier          string                        `json:"roleIdentifier"`
-	Principal               CreateRoleAssignmentPrincipal `json:"principal"`
+	Principal               RoleAssignmentPrincipal `json:"principal"`
 	OrgIdentifier           string                        `json:"orgIdentifier"`
 	ProjectIdentifier       string                        `json:"projectIdentifier"`
 }
 
-type CreateRoleAssignmentPrincipal struct {
+type RoleAssignmentPrincipal struct {
 	Identifier string `json:"identifier"`
 	Type       string `json:"type"`
 }
