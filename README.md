@@ -2,6 +2,10 @@
 
 An utility tool to copy/clone/move a project.
 
+## Install
+
+Download the latest version from [releases page](https://github.com/Fernando-Dourado/harness-move-project/releases/latest)
+
 ## Requirements
 
 - The tool does not create the org or project target.
