@@ -23,3 +23,9 @@ go.work
 
 # VS Code Folder
 .vscode/
+
+# Joes Running ToDo list
+xJoeToDo.md
+
+# OS Specific files
+.DS_Store

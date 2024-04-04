@@ -97,7 +97,6 @@ func (api *ApiRequest) createVariable(variable *model.CreateVariableRequest) err
 			"accountIdentifier": api.Account,
 		}).
 		Post(BaseURL + "/ng/api/variables")
-		fmt.Println("Role Body:", variable)
 	if err != nil {
 		return err
 	}

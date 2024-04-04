@@ -8,9 +8,9 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-const ROLES = "/authz/api/roleassignments"
+const ROLEASSIGNMENT = "/authz/api/roleassignments"
 
-type RoleContext struct {
+type RoleAssignmentContext struct {
 	api           *ApiRequest
 	sourceOrg     string
 	sourceProject string
@@ -18,8 +18,8 @@ type RoleContext struct {
 	targetProject string
 }
 
-func NewAccessControlOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) RoleContext {
-	return RoleContext{
+func NewRoleAssignmentOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) RoleAssignmentContext {
+	return RoleAssignmentContext{
 		api:           api,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
@@ -28,24 +28,17 @@ func NewAccessControlOperation(api *ApiRequest, sourceOrg, sourceProject, target
 	}
 }
 
-func (c RoleContext) Move() error {
+func (c RoleAssignmentContext) Move() error {
 
-	roles, err := c.api.ListRoles(c.sourceOrg, c.sourceProject)
+	roles, err := c.api.listRoleAssignments(c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return err
 	}
-
-	// report(roles)
-	// return nil
 
 	bar := progressbar.Default(int64(len(roles)), "Roles")
 	var failed []string
 
 	for _, r := range roles {
-		if r.Principal.ScopeLevel != nil {
-			// Skip roles that are not project level
-			continue
-		}
 
 		rolePrincipal := model.RoleAssignmentPrincipal{
 			Identifier: r.Principal.Identifier,
@@ -60,9 +53,7 @@ func (c RoleContext) Move() error {
 			ProjectIdentifier:       c.targetProject,
 		}
 
-		fmt.Printf("Role: %+v\n", role)
-		
-		err = c.api.CreateRoleAssignment(role)
+		err = c.api.createRoleAssignment(role)
 
 		if err != nil {
 			failed = append(failed, fmt.Sprintln(r.Identifier, "-", err.Error()))
@@ -75,7 +66,7 @@ func (c RoleContext) Move() error {
 	return nil
 }
 
-func (api *ApiRequest) ListRoles(org, project string) ([]*model.RoleAssignmentContent, error) {
+func (api *ApiRequest) listRoleAssignments(org, project string) ([]*model.RoleAssignmentContent, error) {
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
@@ -86,7 +77,7 @@ func (api *ApiRequest) ListRoles(org, project string) ([]*model.RoleAssignmentCo
 			"projectIdentifier": project,
 			"size":              "1000",
 		}).
-		Get(BaseURL + ROLES)
+		Get(BaseURL + ROLEASSIGNMENT)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +99,7 @@ func (api *ApiRequest) ListRoles(org, project string) ([]*model.RoleAssignmentCo
 	return roles, nil
 }
 
-func (api *ApiRequest) CreateRoleAssignment(role *model.RoleAssignment) error {
+func (api *ApiRequest) createRoleAssignment(role *model.RoleAssignment) error {
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
@@ -116,9 +107,11 @@ func (api *ApiRequest) CreateRoleAssignment(role *model.RoleAssignment) error {
 		SetBody(role).
 		SetQueryParams(map[string]string{
 			"accountIdentifier": api.Account,
+			"orgIdentifier":     role.OrgIdentifier,
+			"projectIdentifier": role.ProjectIdentifier,
 		}).
-		Post(BaseURL + ROLES)
-	//fmt.Println("Role Body:", role)
+		Post(BaseURL + ROLEASSIGNMENT)
+
 	if err != nil {
 		return err
 	}
