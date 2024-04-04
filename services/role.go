@@ -42,22 +42,28 @@ func (c RoleContext) Move() error {
 	var failed []string
 
 	for _, r := range roles {
-		r.OrgIdentifier = c.targetOrg
-		r.ProjectIdentifier = c.targetProject
+		if r.Principal.ScopeLevel != nil {
+			// Skip roles that are not project level
+			continue
+		}
 
-		fmt.Printf("Role Assignment: %+v \n", r.Principal)
+		rolePrincipal := model.CreateRoleAssignmentPrincipal{
+			Identifier: r.Principal.Identifier,
+			Type:       r.Principal.Type,
+		}
 
-		err = c.api.CreateRoleAssignment(&model.CreateRoleAssignment{
-			role: CreateRoleAssignment{
-				ResourceGroupIdentifier: r.ResourceGroupIdentifier,
-				Principal:               r.Principal,
-				Disabled:                r.Disabled,
-				Managed:                 r.Managed,
-				Internal:                r.Internal,
-				OrgIdentifier:           r.OrgIdentifier,
-				ProjectIdentifier:       r.ProjectIdentifier,
-			},
-		})
+		role := &model.CreateRoleAssignment{
+			ResourceGroupIdentifier: r.ResourceGroupIdentifier,
+			RoleIdentifier:          r.RoleIdentifier,
+			Principal:               rolePrincipal,
+			OrgIdentifier:           c.targetOrg,
+			ProjectIdentifier:       c.targetProject,
+		}
+
+		fmt.Printf("Role: %+v\n", role)
+		
+		err = c.api.CreateRoleAssignment(role)
+
 		if err != nil {
 			failed = append(failed, fmt.Sprintln(r.Identifier, "-", err.Error()))
 		}
@@ -112,6 +118,7 @@ func (api *ApiRequest) CreateRoleAssignment(role *model.CreateRoleAssignment) er
 			"accountIdentifier": api.Account,
 		}).
 		Post(BaseURL + ROLES)
+	//fmt.Println("Role Body:", role)
 	if err != nil {
 		return err
 	}
