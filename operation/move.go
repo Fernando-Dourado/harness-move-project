@@ -55,6 +55,7 @@ func (o *Move) Exec() error {
 	operations = append(operations, services.NewRoleAssignmentOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
 	operations = append(operations, services.NewRoleOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
 	operations = append(operations, services.NewResourceGroupOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewUserScopeOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
 
 	for _, op := range operations {
 		if err := op.Move(); err != nil {
