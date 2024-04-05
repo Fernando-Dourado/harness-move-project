@@ -91,7 +91,7 @@ func (api *ApiRequest) listRoles(org, project string) ([]*model.ExistingRoles, e
 
 	roles := []*model.ExistingRoles{}
 	for _, c := range result.Data.Content {
-		if c.HarnessManaged == false {
+		if !c.HarnessManaged {
 			// Only add non-Harness managed roles
 			roles = append(roles, &c.Role)
 		}
