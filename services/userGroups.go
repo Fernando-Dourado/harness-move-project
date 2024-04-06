@@ -19,7 +19,7 @@ type UserGroupContext struct {
 	targetProject string
 }
 
-func NewUserGroupContext(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) UserGroupContext {
+func NewUserGroupOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) UserGroupContext {
 	return UserGroupContext{
 		api:           api,
 		sourceOrg:     sourceOrg,
@@ -36,7 +36,7 @@ func (c UserGroupContext) Move() error {
 		return err
 	}
 
-	bar := progressbar.Default(int64(len(groups)), "Roles")
+	bar := progressbar.Default(int64(len(groups)), "User Groups    ")
 	var failed []string
 
 	for _, g := range groups {
@@ -69,7 +69,7 @@ func (c UserGroupContext) Move() error {
 	}
 	bar.Finish()
 
-	reportFailed(failed, "Roles:")
+	reportFailed(failed, "User Groups:")
 	return nil
 }
 

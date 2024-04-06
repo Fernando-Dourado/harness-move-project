@@ -35,7 +35,7 @@ func (c RoleContext) Move() error {
 		return err
 	}
 
-	bar := progressbar.Default(int64(len(roles)), "Roles")
+	bar := progressbar.Default(int64(len(roles)), "Roles    ")
 	var failed []string
 
 	for _, r := range roles {

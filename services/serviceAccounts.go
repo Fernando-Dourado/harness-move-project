@@ -8,10 +8,9 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-const LISTUSER = "/ng/api/user/aggregate"
-const ADDUSER = "/ng/api/user/users"
+const SERVICEACCOUNTS = "/ng/api/serviceaccount"
 
-type UserScopeContext struct {
+type ServiceAccountContext struct {
 	api           *ApiRequest
 	sourceOrg     string
 	sourceProject string
@@ -19,8 +18,8 @@ type UserScopeContext struct {
 	targetProject string
 }
 
-func NewUserScopeOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) UserScopeContext {
-	return UserScopeContext{
+func NewServiceAccountOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) ServiceAccountContext {
+	return ServiceAccountContext{
 		api:           api,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
@@ -29,38 +28,35 @@ func NewUserScopeOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg,
 	}
 }
 
-func (c UserScopeContext) Move() error {
+func (c ServiceAccountContext) Move() error {
 
-	users, err := c.api.listUsers(c.sourceOrg, c.sourceProject)
+	serviceAccounts, err := c.api.listServiceAccounts(c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return err
 	}
 
-	bar := progressbar.Default(int64(len(users)), "Users    ")
+	bar := progressbar.Default(int64(len(serviceAccounts)), "Service Accounts    ")
 	var failed []string
 
-	for _, u := range users {
+	for _, sa := range serviceAccounts {
 
-		userToAdd := &model.UserEmail{
-			EmailAddress:      []string{u.Email},
-			OrgIdentifier:     c.targetOrg,
-			ProjectIdentifier: c.targetProject,
-		}
+		sa.OrgIdentifier = c.targetOrg
+		sa.ProjectIdentifier = c.targetProject
 
-		err = c.api.addUserToScope(userToAdd)
+		err = c.api.createServiceAccount(sa)
 
 		if err != nil {
-			failed = append(failed, fmt.Sprintln(u.Name, "-", err.Error()))
+			failed = append(failed, fmt.Sprintln(sa.Name, "-", err.Error()))
 		}
 		bar.Add(1)
 	}
 	bar.Finish()
 
-	reportFailed(failed, "Users:")
+	reportFailed(failed, "Service Accounts:")
 	return nil
 }
 
-func (api *ApiRequest) listUsers(org, project string) ([]*model.User, error) {
+func (api *ApiRequest) listServiceAccounts(org, project string) ([]*model.GetServiceAccountData, error) {
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
@@ -69,9 +65,8 @@ func (api *ApiRequest) listUsers(org, project string) ([]*model.User, error) {
 			"accountIdentifier": api.Account,
 			"orgIdentifier":     org,
 			"projectIdentifier": project,
-			"pageSize":          "100",
 		}).
-		Post(BaseURL + LISTUSER)
+		Get(BaseURL + SERVICEACCOUNTS)
 	if err != nil {
 		return nil, err
 	}
@@ -79,33 +74,27 @@ func (api *ApiRequest) listUsers(org, project string) ([]*model.User, error) {
 		return nil, handleErrorResponse(resp)
 	}
 
-	result := model.GetUserResponse{}
+	result := model.GetServiceACcountResponse{}
 	err = json.Unmarshal(resp.Body(), &result)
 	if err != nil {
 		return nil, err
 	}
 
-	users := []*model.User{}
-	for _, c := range result.Data.Content {
-		newUser := c.User
-		users = append(users, &newUser)
-	}
-
-	return users, nil
+	return result.Data, nil
 }
 
-func (api *ApiRequest) addUserToScope(user *model.UserEmail) error {
+func (api *ApiRequest) createServiceAccount(servcieAccount *model.GetServiceAccountData) error {
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").
-		SetBody(user).
+		SetBody(servcieAccount).
 		SetQueryParams(map[string]string{
 			"accountIdentifier": api.Account,
-			"orgIdentifier":     user.OrgIdentifier,
-			"projectIdentifier": user.ProjectIdentifier,
+			"orgIdentifier":     servcieAccount.OrgIdentifier,
+			"projectIdentifier": servcieAccount.ProjectIdentifier,
 		}).
-		Post(BaseURL + ADDUSER)
+		Post(BaseURL + SERVICEACCOUNTS)
 
 	if err != nil {
 		return err

@@ -1,9 +1,9 @@
 package model
 
 type GetUserResponse struct {
-	Status        string       `json:"status"`
-	Data          GetUserData  `json:"data"`
-	CorrelationID string       `json:"correlationId"`
+	Status        string      `json:"status"`
+	Data          GetUserData `json:"data"`
+	CorrelationID string      `json:"correlationId"`
 }
 
 type GetUserData struct {

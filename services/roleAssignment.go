@@ -35,7 +35,7 @@ func (c RoleAssignmentContext) Move() error {
 		return err
 	}
 
-	bar := progressbar.Default(int64(len(roleAssignments)), "Roles")
+	bar := progressbar.Default(int64(len(roleAssignments)), "Roles Assignments    ")
 	var failed []string
 
 	for _, r := range roleAssignments {
@@ -62,7 +62,7 @@ func (c RoleAssignmentContext) Move() error {
 	}
 	bar.Finish()
 
-	reportFailed(failed, "Roles:")
+	reportFailed(failed, "Role Assingments:")
 	return nil
 }
 

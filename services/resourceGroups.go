@@ -76,7 +76,7 @@ func (api *ApiRequest) listResourceGroups(org, project string) ([]*model.Resourc
 			"accountIdentifier": api.Account,
 			"orgIdentifier":     org,
 			"projectIdentifier": project,
-			"pageSize":             "100",
+			"pageSize":          "100",
 		}).
 		Get(BaseURL + RESOURCEGROUP)
 	if err != nil {
