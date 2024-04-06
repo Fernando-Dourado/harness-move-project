@@ -73,7 +73,7 @@ func (api *ApiRequest) listRoles(org, project string) ([]*model.ExistingRoles, e
 			"accountIdentifier": api.Account,
 			"orgIdentifier":     org,
 			"projectIdentifier": project,
-			"size":              "1000",
+			"limit":             "100",
 		}).
 		Get(BaseURL + ROLE)
 	if err != nil {
@@ -93,7 +93,8 @@ func (api *ApiRequest) listRoles(org, project string) ([]*model.ExistingRoles, e
 	for _, c := range result.Data.Content {
 		if !c.HarnessManaged {
 			// Only add non-Harness managed roles
-			roles = append(roles, &c.Role)
+			newRole := c.Role
+			roles = append(roles, &newRole)
 		}
 	}
 

@@ -75,7 +75,7 @@ func (api *ApiRequest) listRoleAssignments(org, project string) ([]*model.Existi
 			"accountIdentifier": api.Account,
 			"orgIdentifier":     org,
 			"projectIdentifier": project,
-			"size":              "1000",
+			"pageSize":          "100",
 		}).
 		Get(BaseURL + ROLEASSIGNMENT)
 	if err != nil {
@@ -93,7 +93,8 @@ func (api *ApiRequest) listRoleAssignments(org, project string) ([]*model.Existi
 
 	roleAssignments := []*model.ExistingRoleAssignment{}
 	for _, c := range result.Data.Content {
-		roleAssignments = append(roleAssignments, &c.RoleAssignment)
+		newRoleAssignment := c.RoleAssignment
+		roleAssignments = append(roleAssignments, &newRoleAssignment)
 	}
 
 	return roleAssignments, nil

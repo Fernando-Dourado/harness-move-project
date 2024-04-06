@@ -8,7 +8,8 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-const USERS = "/ng/api/user/aggregate"
+const LISTUSER = "/ng/api/user/aggregate"
+const ADDUSER = "/ng/api/user/users"
 
 type UserScopeContext struct {
 	api           *ApiRequest
@@ -40,13 +41,13 @@ func (c UserScopeContext) Move() error {
 
 	for _, u := range users {
 
-		emails := &model.UserEmail{
-			EmailAddress:      u.Email,
+		userToAdd := &model.UserEmail{
+			EmailAddress:      []string{u.Email},
 			OrgIdentifier:     c.targetOrg,
 			ProjectIdentifier: c.targetProject,
 		}
 
-		err = c.api.AddUserToScope(emails)
+		err = c.api.addUserToScope(userToAdd)
 
 		if err != nil {
 			failed = append(failed, fmt.Sprintln(u.Name, "-", err.Error()))
@@ -68,9 +69,9 @@ func (api *ApiRequest) listUsers(org, project string) ([]*model.User, error) {
 			"accountIdentifier": api.Account,
 			"orgIdentifier":     org,
 			"projectIdentifier": project,
-			"size":              "1000",
+			"pageSize":          "100",
 		}).
-		Get(BaseURL + ROLE)
+		Post(BaseURL + LISTUSER)
 	if err != nil {
 		return nil, err
 	}
@@ -86,14 +87,14 @@ func (api *ApiRequest) listUsers(org, project string) ([]*model.User, error) {
 
 	users := []*model.User{}
 	for _, c := range result.Data.Content {
-		users = append(users, &c.User)
-
+		newUser := c.User
+		users = append(users, &newUser)
 	}
 
 	return users, nil
 }
 
-func (api *ApiRequest) AddUserToScope(user *model.UserEmail) error {
+func (api *ApiRequest) addUserToScope(user *model.UserEmail) error {
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
@@ -104,7 +105,7 @@ func (api *ApiRequest) AddUserToScope(user *model.UserEmail) error {
 			"orgIdentifier":     user.OrgIdentifier,
 			"projectIdentifier": user.ProjectIdentifier,
 		}).
-		Post(BaseURL + ROLE)
+		Post(BaseURL + ADDUSER)
 
 	if err != nil {
 		return err

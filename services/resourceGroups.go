@@ -76,7 +76,7 @@ func (api *ApiRequest) listResourceGroups(org, project string) ([]*model.Resourc
 			"accountIdentifier": api.Account,
 			"orgIdentifier":     org,
 			"projectIdentifier": project,
-			"size":              "1000",
+			"pageSize":             "100",
 		}).
 		Get(BaseURL + RESOURCEGROUP)
 	if err != nil {
@@ -96,7 +96,8 @@ func (api *ApiRequest) listResourceGroups(org, project string) ([]*model.Resourc
 	for _, c := range result.Data.Content {
 		if !c.HarnessManaged {
 			// Only add non-Harness managed Resoure Groups
-			resourceGroups = append(resourceGroups, &c.ResourceGroup)
+			newResourceGroup := c.ResourceGroup
+			resourceGroups = append(resourceGroups, &newResourceGroup)
 		}
 	}
 
@@ -104,9 +105,6 @@ func (api *ApiRequest) listResourceGroups(org, project string) ([]*model.Resourc
 }
 
 func (api *ApiRequest) createResourceGroup(rg *model.NewResourceGroupContent) error {
-
-	jsonBody, _ := json.Marshal(rg)
-	fmt.Println("JSON Request Body:", string(jsonBody))
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
