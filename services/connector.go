@@ -36,7 +36,7 @@ func (c ConnectorContext) Move() error {
 		return err
 	}
 
-	bar := progressbar.Default(int64(len(connectors)), "User Groups    ")
+	bar := progressbar.Default(int64(len(connectors)), "Connectors    ")
 	var failed []string
 
 	for _, cn := range connectors {
