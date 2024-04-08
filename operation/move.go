@@ -3,6 +3,7 @@ package operation
 import (
 	"fmt"
 
+	"github.com/Fernando-Dourado/harness-move-project/rest"
 	"github.com/Fernando-Dourado/harness-move-project/services"
 	"github.com/fatih/color"
 	"github.com/go-resty/resty/v2"
@@ -29,8 +30,9 @@ type (
 
 func (o *Move) Exec() error {
 
+	client := resty.New()
 	api := services.ApiRequest{
-		Client:  resty.New(),
+		Client:  client,
 		Token:   o.Config.Token,
 		Account: o.Config.Account,
 	}
@@ -50,8 +52,8 @@ func (o *Move) Exec() error {
 	operations = append(operations, services.NewInfrastructureOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
 	operations = append(operations, services.NewServiceOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
 	operations = append(operations, services.NewTemplateOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
-	operations = append(operations, services.NewPipelineOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
-	operations = append(operations, services.NewInputsetOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, o.createPipelineOperation(client))
+	operations = append(operations, o.createInputsetOperation(client))
 
 	for _, op := range operations {
 		if err := op.Move(); err != nil {
@@ -61,4 +63,17 @@ func (o *Move) Exec() error {
 
 	fmt.Println(color.GreenString("Done"))
 	return nil
+}
+
+func (o *Move) createPipelineOperation(client *resty.Client) services.Operation {
+	return services.NewPipelineOperation(
+		rest.NewPipelineClient(client, o.Config.Token, o.Config.Account),
+		o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project)
+}
+
+func (o *Move) createInputsetOperation(client *resty.Client) services.Operation {
+	return services.NewInputsetOperation(
+		rest.NewInputsetClient(client, o.Config.Token, o.Config.Account),
+		rest.NewPipelineClient(client, o.Config.Token, o.Config.Account),
+		o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project)
 }
