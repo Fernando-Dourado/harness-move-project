@@ -1,6 +1,13 @@
+<div class="title-block" style="text-align: center;" align="center">
+
 # Harness Move
 
 An utility tool to copy/clone/move a project.
+
+![](https://img.shields.io/github/v/release/Fernando-Dourado/harness-move-project)
+![](https://img.shields.io/github/release-date/Fernando-Dourado/harness-move-project)
+
+</div>
 
 ## Install
 
