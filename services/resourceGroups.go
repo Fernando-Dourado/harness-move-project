@@ -52,8 +52,6 @@ func (c ResourceGroupContext) Move() error {
 			ResourceGroup: rg,
 		}
 
-		// fmt.Printf("Resource Groups: %+v\n", rg)
-
 		err = c.api.createResourceGroup(newResourceGroup)
 
 		if err != nil {
