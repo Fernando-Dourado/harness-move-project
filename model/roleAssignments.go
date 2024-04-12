@@ -51,6 +51,7 @@ type RoleAssignmentScope struct {
 }
 
 type NewRoleAssignment struct {
+	Identifier              string                     `json:"identifier"`
 	ResourceGroupIdentifier string                     `json:"resourceGroupIdentifier"`
 	RoleIdentifier          string                     `json:"roleIdentifier"`
 	Principal               NewRoleAssignmentPrincipal `json:"principal"`

@@ -46,6 +46,7 @@ func (c RoleAssignmentContext) Move() error {
 		}
 
 		role := &model.NewRoleAssignment{
+			Identifier:              r.Identifier,
 			ResourceGroupIdentifier: r.ResourceGroupIdentifier,
 			RoleIdentifier:          r.RoleIdentifier,
 			Principal:               rolePrincipal,
