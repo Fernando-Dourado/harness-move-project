@@ -28,11 +28,19 @@ When the tool try to create and entity on target project that the same identifie
 
 - Variables
 - Environments
+- Environment Groups
 - Infrastructure Definition
 - Services
 - Templates
 - Pipelines
 - Input Sets
+- Roles
+- User Groups
+- Service Accounts
+- Role Assignments
+- Resource Groups
+- Connectors
+- Triggers & Webhooks (Work in progress)
 - File Store (Working in progress)
 
 ## Not Supported Entities
