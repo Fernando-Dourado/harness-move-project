@@ -62,6 +62,11 @@ func (c FileStoreContext) handleNode(n *model.FileStoreNode, failures []string) 
 		return err
 	}
 
+	// A FILE DON'T HAVE CHILD NODES
+	if n.Type == model.File {
+		return nil
+	}
+
 	// SEARCH FOR CHILD NODES
 	nodes, err := c.listNodes(n.Identifier, n.Name, &n.ParentIdentifier)
 	if err != nil {
