@@ -42,6 +42,7 @@ When the tool try to create and entity on target project that the same identifie
 - Environments
 - Infrastructure Definition
 - Services
+- Service Overrides V1
 - Templates
 - Pipelines
 - Input Sets
@@ -52,7 +53,7 @@ When the tool try to create and entity on target project that the same identifie
 - Secrets
 - Triggers
 - Connectors
-- Service Overrides
+- Service Overrides V2
 
 ## Limitation
 
