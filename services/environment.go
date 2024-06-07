@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/Fernando-Dourado/harness-move-project/model"
 	"github.com/schollz/progressbar/v3"
@@ -39,7 +40,7 @@ func (c EnvironmentContext) Move() error {
 	for _, env := range envs {
 		e := env.Environment
 
-		newYaml := createYaml(e.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
+		newYaml := createYaml(sanitizeEnvYaml(e.Yaml), c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
 		req := &model.CreateEnvironmentRequest{
 			OrgIdentifier:     c.targetOrg,
 			ProjectIdentifier: c.targetProject,
@@ -107,4 +108,8 @@ func (api *ApiRequest) createEnvironment(env *model.CreateEnvironmentRequest) er
 	}
 
 	return nil
+}
+
+func sanitizeEnvYaml(yaml string) string {
+	return strings.ReplaceAll(yaml, "\"", "")
 }
