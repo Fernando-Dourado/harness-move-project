@@ -30,7 +30,7 @@ func NewFeatureFlagOperation(api *ApiRequest, sourceOrg, sourceProject, targetOr
 
 func (c FeatureContext) Move() error {
 
-	featureFlags := []*model.FeatureFlag{}
+	// featureFlags := []*model.FeatureFlag{}
 
 	featureFlags, err := c.api.listFeatureFlags(c.sourceOrg, c.sourceProject)
 	if err != nil {
@@ -40,19 +40,36 @@ func (c FeatureContext) Move() error {
 	bar := progressbar.Default(int64(len(featureFlags)), "Feature Flags    ")
 	var failed []string
 
-	for _, t := range featureFlags {
-
-		newFeatureFlag := &model.FeatureFlag{
-			Name:              t.Name,
-			Identifier:        t.Identifier,
-			OrgIdentifier:     c.targetOrg,
-			ProjectIdentifier: c.targetProject,
+	for _, f := range featureFlags {
+		if f.Tags == nil {
+			f.Tags = []string{}
 		}
 
-		err = c.api.createFeatureFlags(newFeatureFlag)
+		err = c.api.createFeatureFlags(&model.CreateFeatureFlag{
+			OrgIdentifier:       c.targetOrg,
+			ProjectIdentifier:   c.targetProject,
+			Archived:            f.Archived,
+			CreatedAt:           f.CreatedAt,
+			DefaultOffVariation: f.DefaultOffVariation,
+			DefaultOnVariation:  f.DefaultOnVariation,
+			Description:         f.Description,
+			EnvProperties:       f.EnvProperties,
+			Evaluation:          f.Evaluation,
+			Identifier:          f.Identifier,
+			Kind:                f.Kind,
+			ModifiedAt:          f.ModifiedAt,
+			Name:                f.Name,
+			Owner:               fmt.Sprint(f.Owner),
+			Permanent:           f.Permanent,
+			Prerequisites:       f.Prerequisites,
+			Project:             c.targetProject,
+			Services:            f.Services,
+			Tags:                f.Tags,
+			Variations:          f.Variations,
+		})
 
 		if err != nil {
-			failed = append(failed, fmt.Sprintln(t.Name, "-", err.Error()))
+			failed = append(failed, fmt.Sprintln(f.Name, "-", err.Error()))
 		}
 		bar.Add(1)
 	}
@@ -62,15 +79,17 @@ func (c FeatureContext) Move() error {
 	return nil
 }
 
-func (api *ApiRequest) listFeatureFlags( org, project string) ([]*model.FeatureFlag, error) {
+func (api *ApiRequest) listFeatureFlags(org, project string) ([]*model.FeatureFlag, error) {
+
+	api.Client.SetDebug(true)
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").
 		SetQueryParams(map[string]string{
-			"accountIdentifier":     api.Account,
-			"orgIdentifier":         org,
-			"projectIdentifier":     project,
+			"accountIdentifier": api.Account,
+			"orgIdentifier":     org,
+			"projectIdentifier": project,
 		}).
 		Get(BaseURL + FEATFLAGS)
 	if err != nil {
@@ -95,7 +114,7 @@ func (api *ApiRequest) listFeatureFlags( org, project string) ([]*model.FeatureF
 	return featureFlags, nil
 }
 
-func (api *ApiRequest) createFeatureFlags(featureFlag *model.FeatureFlag) error {
+func (api *ApiRequest) createFeatureFlags(featureFlag *model.CreateFeatureFlag) error {
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
@@ -103,8 +122,8 @@ func (api *ApiRequest) createFeatureFlags(featureFlag *model.FeatureFlag) error 
 		SetBody(featureFlag).
 		SetQueryParams(map[string]string{
 			"accountIdentifier": api.Account,
-			"orgIdentifier":         featureFlag.OrgIdentifier,
-			"projectIdentifier":     featureFlag.ProjectIdentifier,
+			"orgIdentifier":     featureFlag.OrgIdentifier,
+			"projectIdentifier": featureFlag.ProjectIdentifier,
 		}).
 		Post(BaseURL + FEATFLAGS)
 

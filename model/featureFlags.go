@@ -5,7 +5,7 @@ type FeatureFlagListResult struct {
 	PageCount int64         `json:"pageCount"`
 	PageIndex int64         `json:"pageIndex"`
 	PageSize  int64         `json:"pageSize"`
-	Features  []FeatureFlag `json:"tags"`
+	Features  []FeatureFlag `json:"features"`
 }
 
 type FeatureFlag struct {
@@ -27,9 +27,33 @@ type FeatureFlag struct {
 	Project              string                   `json:"project"`
 	Services             []interface{}            `json:"services"`
 	Tags                 interface{}              `json:"tags"`
-	Variations           []Variation              `json:"variations"`
-	OrgIdentifier         string              `json:"orgIdentifier"`
-	ProjectIdentifier     string              `json:"projectIdentifier"`
+	Variations           []FeatureFlagVariation   `json:"variations"`
+	OrgIdentifier        string                   `json:"orgIdentifier"`
+	ProjectIdentifier    string                   `json:"projectIdentifier"`
+}
+
+type CreateFeatureFlag struct {
+	Archived             bool                     `json:"archived"`
+	CreatedAt            int64                    `json:"createdAt"`
+	DefaultOffVariation  string                   `json:"defaultOffVariation"`
+	DefaultOnVariation   string                   `json:"defaultOnVariation"`
+	Description          string                   `json:"description"`
+	EnvProperties        FeatureFlagEnvProperties `json:"envProperties"`
+	Evaluation           string                   `json:"evaluation"`
+	EvaluationIdentifier string                   `json:"evaluationIdentifier"`
+	Identifier           string                   `json:"identifier"`
+	Kind                 string                   `json:"kind"`
+	ModifiedAt           int64                    `json:"modifiedAt"`
+	Name                 string                   `json:"name"`
+	Owner                string                   `json:"owner"`
+	Permanent            bool                     `json:"permanent"`
+	Prerequisites        []interface{}            `json:"prerequisites"`
+	Project              string                   `json:"project"`
+	Services             []interface{}            `json:"services"`
+	Tags                 interface{}              `json:"tags"`
+	Variations           []FeatureFlagVariation   `json:"variations"`
+	OrgIdentifier        string                   `json:"orgIdentifier"`
+	ProjectIdentifier    string                   `json:"projectIdentifier"`
 }
 
 type FeatureFlagEnvProperties struct {
@@ -48,7 +72,7 @@ type FeatureFlagEnvProperties struct {
 type DefaultServe struct {
 }
 
-type Variation struct {
+type FeatureFlagVariation struct {
 	Identifier string `json:"identifier"`
 	Name       string `json:"name"`
 	Value      string `json:"value"`

@@ -42,6 +42,7 @@ When the tool try to create and entity on target project that the same identifie
 - Connectors
 - Triggers & Webhooks (Work in progress)
 - File Store (Working in progress)
+- Feature Flags
 
 ## Not Supported Entities
 
