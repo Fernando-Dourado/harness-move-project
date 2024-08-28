@@ -81,7 +81,7 @@ func (c FeatureContext) Move() error {
 
 func (api *ApiRequest) listFeatureFlags(org, project string) ([]*model.FeatureFlag, error) {
 
-	api.Client.SetDebug(true)
+	// api.Client.SetDebug(true)
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
