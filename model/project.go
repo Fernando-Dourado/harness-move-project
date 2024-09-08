@@ -16,7 +16,15 @@ type GetProjectData struct {
 }
 
 type Project struct {
-	OrgIdentifier string `json:"orgIdentifier"`
-	Identifier    string `json:"identifier"`
-	Name          string `json:"name"`
+	OrgIdentifier string        `json:"orgIdentifier"`
+	Identifier    string        `json:"identifier"`
+	Name          string        `json:"name"`
+	Color         string        `json:"color"`
+	Modules       []interface{} `json:"modules"`
+	Description   string        `json:"description"`
+	Tags          Tags          `json:"tags"`
+}
+
+type ProjectWrapper struct {
+	Project *Project `json:"project"`
 }
