@@ -8,9 +8,9 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-const TARGETGROUPS = "/cf/admin/segments"
+const TARGETS = "/cf/admin/targets"
 
-type TargetGroupContext struct {
+type TargetContext struct {
 	api           *ApiRequest
 	sourceOrg     string
 	sourceProject string
@@ -18,8 +18,8 @@ type TargetGroupContext struct {
 	targetProject string
 }
 
-func NewTargetGroups(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) TargetGroupContext {
-	return TargetGroupContext{
+func NewTargets(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) TargetContext {
+	return TargetContext{
 		api:           api,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
@@ -28,7 +28,7 @@ func NewTargetGroups(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targe
 	}
 }
 
-func (c TargetGroupContext) Move() error {
+func (c TargetContext) Move() error {
 
 	envs, err := c.api.listEnvironments(c.sourceOrg, c.sourceProject)
 	if err != nil {
@@ -57,9 +57,9 @@ func (c TargetGroupContext) Move() error {
 				Identifier:  i.Identifier,
 				Org:         c.targetOrg,
 				Project:     c.targetProject,
-				Environment:    i.Environment,
-				Attributes: i.Attributes,
-				Segments:   i.Segments,
+				Environment: i.Environment,
+				Attributes:  i.Attributes,
+				Segments:    i.Segments,
 			})
 			if err != nil {
 				failed = append(failed, fmt.Sprintln(e.Name, "/", i.Name, "-", err.Error()))
@@ -86,7 +86,7 @@ func (api *ApiRequest) listTargets(org, project, envId string) ([]*model.Target,
 			"environmentIdentifier": envId,
 			"size":                  "1000",
 		}).
-		Get(BaseURL + TARGETGROUPS)
+		Get(BaseURL + TARGETS)
 	if err != nil {
 		return nil, err
 	}
@@ -117,9 +117,9 @@ func (api *ApiRequest) createTarget(target *model.Target) error {
 		SetBody(target).
 		SetQueryParams(map[string]string{
 			"accountIdentifier": api.Account,
-			"orgIdentifier": target.Org,
+			"orgIdentifier":     target.Org,
 		}).
-		Post(BaseURL + TARGETGROUPS)
+		Post(BaseURL + TARGETS)
 	if err != nil {
 		return err
 	}
