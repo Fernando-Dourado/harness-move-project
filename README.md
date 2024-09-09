@@ -1,6 +1,6 @@
 # Harness Move
 
-An utility tool to copy/clone/move a project.
+A utility tool to copy/clone/move a project.
 
 ## Requirements
 
