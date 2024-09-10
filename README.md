@@ -27,8 +27,8 @@ Execute the operation running at the following command in your terminal that wil
 
 ```sh
 ./harness-move-project \
-  --api-token <SAT_OR_PAT> \
-  --account <account_identifier> \
+  --apiToken <SAT_OR_PAT> \
+  --accountId <account_identifier> \
   --csvPath ./exampleCsvFile.csv \
   --baseUrl https://app.harness.io
 ```
