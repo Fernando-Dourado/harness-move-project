@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/Fernando-Dourado/harness-move-project/model"
+	"github.com/jf781/harness-move-project/model"
 	"github.com/schollz/progressbar/v3"
 )
 

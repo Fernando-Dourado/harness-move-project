@@ -11,7 +11,7 @@ A utility tool to copy/clone a project.
 
 ## Install
 
-Download the latest version from [releases page](https://github.com/Fernando-Dourado/harness-move-project/releases/latest)
+Download the latest version from [releases page](https://github.com/jf781/harness-move-project/releases/latest)
 
 ## Requirements
 
