@@ -78,7 +78,7 @@ func (api *ApiRequest) listRoleAssignments(org, project string) ([]*model.Existi
 			"projectIdentifier": project,
 			"pageSize":          "100",
 		}).
-		Get(BaseURL + ROLEASSIGNMENT)
+		Get(api.BaseURL + ROLEASSIGNMENT)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (api *ApiRequest) createRoleAssignment(role *model.NewRoleAssignment) error
 			"orgIdentifier":     role.OrgIdentifier,
 			"projectIdentifier": role.ProjectIdentifier,
 		}).
-		Post(BaseURL + ROLEASSIGNMENT)
+		Post(api.BaseURL + ROLEASSIGNMENT)
 
 	if err != nil {
 		return err

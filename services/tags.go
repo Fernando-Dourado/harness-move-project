@@ -49,9 +49,7 @@ func (c TagsContext) Move() error {
 			failed = append(failed, fmt.Sprintln(e.Name, "-", err.Error()))
 		}
 
-		for _, tag := range envTags {
-			projectTags = append(projectTags, tag)
-		}
+		projectTags = append(projectTags, envTags...)
 	}
 
 	bar := progressbar.Default(int64(len(projectTags)), "Project Tags    ")
@@ -89,7 +87,7 @@ func (api *ApiRequest) listTags(environment, org, project string) ([]*model.Tag,
 			"projectIdentifier":     project,
 			"environmentIdentifier": environment,
 		}).
-		Get(BaseURL + TAGS)
+		Get(api.BaseURL + TAGS)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +121,7 @@ func (api *ApiRequest) createTags(tag *model.CreateTagRequest) error {
 			"orgIdentifier":     tag.OrgIdentifier,
 			"projectIdentifier": tag.ProjectIdentifier,
 		}).
-		Post(BaseURL + TAGS)
+		Post(api.BaseURL + TAGS)
 
 	if err != nil {
 		return err

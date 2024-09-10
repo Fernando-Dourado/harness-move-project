@@ -116,7 +116,7 @@ func (c FileStoreContext) downloadFile(n *model.FileStoreNode) ([]byte, error) {
 			"orgIdentifier":     c.sourceOrg,
 			"projectIdentifier": c.sourceProject,
 		}).
-		Get(BaseURL + "/ng/api/file-store/files/{identifier}/download")
+		Get(c.api.BaseURL + "/ng/api/file-store/files/{identifier}/download")
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func (c FileStoreContext) createFile(n *model.FileStoreNode, b []byte) error {
 			"orgIdentifier":     c.targetOrg,
 			"projectIdentifier": c.targetProject,
 		}).
-		Post(BaseURL + "/ng/api/file-store")
+		Post(c.api.BaseURL + "/ng/api/file-store")
 	if err != nil {
 		return err
 	}
@@ -189,7 +189,7 @@ func (c FileStoreContext) createFolder(n *model.FileStoreNode) error {
 			"orgIdentifier":     c.targetOrg,
 			"projectIdentifier": c.targetProject,
 		}).
-		Post(BaseURL + "/ng/api/file-store")
+		Post(c.api.BaseURL + "/ng/api/file-store")
 	if err != nil {
 		return err
 	}
@@ -218,7 +218,7 @@ func (c FileStoreContext) listNodes(identifier, name string, parentIdentifier *s
 			"orgIdentifier":     c.sourceOrg,
 			"projectIdentifier": c.sourceProject,
 		}).
-		Post(BaseURL + "/ng/api/file-store/folder")
+		Post(c.api.BaseURL + "/ng/api/file-store/folder")
 	if err != nil {
 		return nil, err
 	}

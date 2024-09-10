@@ -4,8 +4,8 @@
 
 A utility tool to copy/clone a project.
 
-![](https://img.shields.io/github/v/release/Fernando-Dourado/harness-move-project)
-![](https://img.shields.io/github/release-date/Fernando-Dourado/harness-move-project)
+![](https://img.shields.io/github/v/release/jf781/harness-move-project)
+![](https://img.shields.io/github/release-date/jf781/harness-move-project)
 
 </div>
 
@@ -27,9 +27,10 @@ Execute the operation running at the following command in your terminal that wil
 
 ```sh
 ./harness-move-project \
-  --api-token <SAT_OR_PAT> \
-  --account <account_identifier> \
-  --csvPath ./exampleCsvFile.csv
+  --apiToken <SAT_OR_PAT> \
+  --accountId <account_identifier> \
+  --csvPath ./exampleCsvFile.csv \
+  --baseUrl https://app.harness.io
 ```
 
 When the tool try to create and entity on target project that the same identifier already exist, it silently ignores the error and continues the execution. Using that strategy you can run it multiple times without side effects.

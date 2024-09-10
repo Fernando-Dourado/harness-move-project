@@ -82,7 +82,7 @@ func (api *ApiRequest) listServiceOverrides(org, project, envId string) ([]*mode
 			"environmentIdentifier": envId,
 			"size":                  "1000",
 		}).
-		Get(BaseURL + "/ng/api/environmentsV2/serviceOverrides")
+		Get(api.BaseURL + "/ng/api/environmentsV2/serviceOverrides")
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (api *ApiRequest) createServiceOverride(override *model.CreateServiceOverri
 		SetQueryParams(map[string]string{
 			"accountIdentifier": api.Account,
 		}).
-		Post(BaseURL + "/ng/api/environmentsV2/serviceOverrides")
+		Post(api.BaseURL + "/ng/api/environmentsV2/serviceOverrides")
 	if err != nil {
 		return err
 	}

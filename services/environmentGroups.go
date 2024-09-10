@@ -75,7 +75,7 @@ func (api *ApiRequest) listEnvGroups(org, project string) ([]model.EnvGroupConte
 			"projectIdentifier": project,
 			"size":              "100",
 		}).
-		Post(BaseURL + ENVGROUPLIST)
+		Post(api.BaseURL + ENVGROUPLIST)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func (api *ApiRequest) createEnvGroup(envGroup model.CreateEnvGroup) error {
 		SetQueryParams(map[string]string{
 			"accountIdentifier": api.Account,
 		}).
-		Post(BaseURL + ENVGROUP)
+		Post(api.BaseURL + ENVGROUP)
 
 	if err != nil {
 		return err

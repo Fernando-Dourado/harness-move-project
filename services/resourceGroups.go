@@ -76,7 +76,7 @@ func (api *ApiRequest) listResourceGroups(org, project string) ([]*model.Resourc
 			"projectIdentifier": project,
 			"pageSize":          "100",
 		}).
-		Get(BaseURL + RESOURCEGROUP)
+		Get(api.BaseURL + RESOURCEGROUP)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func (api *ApiRequest) createResourceGroup(rg *model.NewResourceGroupContent) er
 			"orgIdentifier":     rg.ResourceGroup.OrgIdentifier,
 			"projectIdentifier": rg.ResourceGroup.ProjectIdentifier,
 		}).
-		Post(BaseURL + RESOURCEGROUP)
+		Post(api.BaseURL + RESOURCEGROUP)
 
 	if err != nil {
 		return err

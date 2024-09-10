@@ -66,7 +66,7 @@ func (api *ApiRequest) listServiceAccounts(org, project string) ([]*model.GetSer
 			"orgIdentifier":     org,
 			"projectIdentifier": project,
 		}).
-		Get(BaseURL + SERVICEACCOUNTS)
+		Get(api.BaseURL + SERVICEACCOUNTS)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (api *ApiRequest) createServiceAccount(servcieAccount *model.GetServiceAcco
 			"orgIdentifier":     servcieAccount.OrgIdentifier,
 			"projectIdentifier": servcieAccount.ProjectIdentifier,
 		}).
-		Post(BaseURL + SERVICEACCOUNTS)
+		Post(api.BaseURL + SERVICEACCOUNTS)
 
 	if err != nil {
 		return err

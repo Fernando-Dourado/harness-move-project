@@ -86,7 +86,7 @@ func (api *ApiRequest) listTargets(org, project, envId string) ([]*model.Target,
 			"environmentIdentifier": envId,
 			"size":                  "1000",
 		}).
-		Get(BaseURL + TARGETS)
+		Get(api.BaseURL + TARGETS)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (api *ApiRequest) createTarget(target *model.Target) error {
 			"accountIdentifier": api.Account,
 			"orgIdentifier":     target.Org,
 		}).
-		Post(BaseURL + TARGETS)
+		Post(api.BaseURL + TARGETS)
 	if err != nil {
 		return err
 	}

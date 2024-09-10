@@ -71,7 +71,7 @@ func (api *ApiRequest) listUsers(org, project string) ([]*model.User, error) {
 			"projectIdentifier": project,
 			"pageSize":          "100",
 		}).
-		Post(BaseURL + LISTUSER)
+		Post(api.BaseURL + LISTUSER)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (api *ApiRequest) addUserToScope(user *model.UserEmail) error {
 			"orgIdentifier":     user.OrgIdentifier,
 			"projectIdentifier": user.ProjectIdentifier,
 		}).
-		Post(BaseURL + ADDUSER)
+		Post(api.BaseURL + ADDUSER)
 
 	if err != nil {
 		return err
