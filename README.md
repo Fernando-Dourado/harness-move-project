@@ -63,6 +63,10 @@ There is an example CSV file named `exampleCsvFile.csv` that you can update with
 - Triggers
 - Service Overrides
 
+## Future items
+- Mark source project as read-only
+- Create new project SDK key and save as a secret when project is created
+
 ## Limitation
 
 - The tool can only fetch 1000 elements of each entity type.
