@@ -1,7 +1,10 @@
-on:
-  release:
-    types: [created]
+name: "On Release"
 
+on:
+  push:
+    branches:
+      - main
+      
 jobs:
   releases-matrix:
     name: Release Go Binary
