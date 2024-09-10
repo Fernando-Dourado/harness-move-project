@@ -1,16 +1,29 @@
+<div class="title-block" style="text-align: center;" align="center">
+
 # Harness Move
 
 A utility tool to copy/clone a project.
+
+![](https://img.shields.io/github/v/release/Fernando-Dourado/harness-move-project)
+![](https://img.shields.io/github/release-date/Fernando-Dourado/harness-move-project)
+
+</div>
+
+## Install
+
+Download the latest version from [releases page](https://github.com/Fernando-Dourado/harness-move-project/releases/latest)
 
 ## Requirements
 
 - The tool does not create the target Organization.  It must be pre-existing
 - As safety operation, the tool do not delete the entities from the source project.
 - The `api-key` need to have access to read from the source project and write to the target project.
+- You can run it multiple times, when the same entity already exists in the target project we ignore it and do not report it as an error.
 
 ## Usage
 
 Execute the operation running at the following command in your terminal that will read from a CSV file. 
+
 
 ```sh
 ./harness-move-project \
@@ -43,6 +56,7 @@ There is an example CSV file named `exampleCsvFile.csv` that you can update with
 - Environment Groups
 - Infrastructure Definition
 - Services
+- Service Overrides V1
 - Templates
 - Pipelines
 - Input Sets
@@ -56,12 +70,14 @@ There is an example CSV file named `exampleCsvFile.csv` that you can update with
 - File Store (Working in progress)
 - Feature Flags
 - Feature Flag Targets & Target Groups
+- File Store
 
 ## Not Supported Entities
 
 - Secrets
 - Triggers
-- Service Overrides
+- Connectors
+- Service Overrides V2
 
 ## Future items
 - Mark source project as read-only
@@ -70,6 +86,7 @@ There is an example CSV file named `exampleCsvFile.csv` that you can update with
 ## Limitation
 
 - The tool can only fetch 1000 elements of each entity type.
+- Tags are not supported and cannot be copied from the source entity to the target one.
 
 ## Contributions
 

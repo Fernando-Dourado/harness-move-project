@@ -7,6 +7,7 @@
 *.dll
 *.so
 *.dylib
+bin/
 harness-move-project
 
 # Test binary, built with `go test -c`
@@ -24,8 +25,7 @@ go.work
 # VS Code Folder
 .vscode/
 
-# Joes Running ToDo list
-xJoeToDo.md
 
 # OS Specific files
 .DS_Store
+response-samples/
