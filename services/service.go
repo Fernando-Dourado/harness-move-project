@@ -75,7 +75,7 @@ func (c ServiceContext) listServices(org, project string) ([]*model.ServiceListC
 			"projectIdentifier": project,
 			"size":              "1000",
 		}).
-		Get(BaseURL + LIST_SERVICES)
+		Get(api.BaseURL + LIST_SERVICES)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func (c ServiceContext) createService(service *model.CreateServiceRequest) error
 		SetQueryParams(map[string]string{
 			"accountIdentifier": api.Account,
 		}).
-		Post(BaseURL + CREATE_SERVICES)
+		Post(api.BaseURL + CREATE_SERVICES)
 	if err != nil {
 		return err
 	}

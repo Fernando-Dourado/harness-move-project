@@ -68,7 +68,7 @@ func (api *ApiRequest) listConnectors(org, project string) ([]*model.ConnectorCo
 			"projectIdentifier": project,
 			"pageSize":          "100",
 		}).
-		Post(BaseURL + CONNECTORLOOKUP)
+		Post(api.BaseURL + CONNECTORLOOKUP)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func (api *ApiRequest) addConnector(connector *model.ConnectorContent) error {
 		SetQueryParams(map[string]string{
 			"accountIdentifier": api.Account,
 		}).
-		Post(BaseURL + CONNECTORCREATE)
+		Post(api.BaseURL + CONNECTORCREATE)
 
 	if err != nil {
 		return err

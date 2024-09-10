@@ -84,7 +84,7 @@ func (api *ApiRequest) listUserGroups(org, project string) ([]*model.UserGroup, 
 			"projectIdentifier": project,
 			"pageSize":          "100",
 		}).
-		Get(BaseURL + USERGROUP)
+		Get(api.BaseURL + USERGROUP)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (api *ApiRequest) getUsersEmail(user *model.UserGroupLookup) (*model.UserGr
 			"orgIdentifier":     user.OrgIdentifier,
 			"projectIdentifier": user.ProjectIdentifier,
 		}).
-		Get(BaseURL + USERLOOKUP + "/" + user.Identifier)
+		Get(api.BaseURL + USERLOOKUP + "/" + user.Identifier)
 
 	if err != nil {
 		return nil, err
@@ -148,7 +148,7 @@ func (api *ApiRequest) addUserGroup(userGroup *model.UserGroup) error {
 			"orgIdentifier":     userGroup.OrgIdentifier,
 			"projectIdentifier": userGroup.ProjectIdentifier,
 		}).
-		Post(BaseURL + USERGROUP)
+		Post(api.BaseURL + USERGROUP)
 
 	if err != nil {
 		return err

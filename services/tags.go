@@ -87,7 +87,7 @@ func (api *ApiRequest) listTags(environment, org, project string) ([]*model.Tag,
 			"projectIdentifier":     project,
 			"environmentIdentifier": environment,
 		}).
-		Get(BaseURL + TAGS)
+		Get(api.BaseURL + TAGS)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func (api *ApiRequest) createTags(tag *model.CreateTagRequest) error {
 			"orgIdentifier":     tag.OrgIdentifier,
 			"projectIdentifier": tag.ProjectIdentifier,
 		}).
-		Post(BaseURL + TAGS)
+		Post(api.BaseURL + TAGS)
 
 	if err != nil {
 		return err

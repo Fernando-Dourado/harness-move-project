@@ -65,7 +65,7 @@ func (api *ApiRequest) listVariables(org, project string) ([]*model.Variable, er
 			"projectIdentifier": project,
 			"size":              "1000",
 		}).
-		Get(BaseURL + "/ng/api/variables")
+		Get(api.BaseURL + "/ng/api/variables")
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (api *ApiRequest) createVariable(variable *model.CreateVariableRequest) err
 		SetQueryParams(map[string]string{
 			"accountIdentifier": api.Account,
 		}).
-		Post(BaseURL + "/ng/api/variables")
+		Post(api.BaseURL + "/ng/api/variables")
 	if err != nil {
 		return err
 	}

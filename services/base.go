@@ -10,12 +10,13 @@ import (
 	"github.com/jf781/harness-move-project/model"
 )
 
-const BaseURL = "https://app.harness.io"
+// const BaseURL = "https://app.harness.io"
 
 type ApiRequest struct {
 	Client  *resty.Client
 	Token   string
 	Account string
+	BaseURL string
 }
 
 type Operation interface {
