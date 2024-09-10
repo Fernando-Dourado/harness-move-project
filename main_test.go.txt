@@ -1,3 +1,5 @@
+// 9.10.24 - Converted to text file because we are no longer using the `applyArgumentRules` func
+
 package main
 
 import (
