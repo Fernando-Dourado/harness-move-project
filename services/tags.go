@@ -49,9 +49,7 @@ func (c TagsContext) Move() error {
 			failed = append(failed, fmt.Sprintln(e.Name, "-", err.Error()))
 		}
 
-		for _, tag := range envTags {
-			projectTags = append(projectTags, tag)
-		}
+		projectTags = append(projectTags, envTags...)
 	}
 
 	bar := progressbar.Default(int64(len(projectTags)), "Project Tags    ")
