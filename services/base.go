@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/go-resty/resty/v2"
 	"github.com/jf781/harness-move-project/model"
 )
@@ -60,7 +61,7 @@ func removeNewLine(value string) string {
 
 func reportFailed(failed []string, description string) {
 	if len(failed) > 0 {
-		fmt.Println("Failed", description, len(failed))
-		fmt.Println(strings.Join(failed, "\n"))
+		fmt.Println(color.RedString(fmt.Sprintf("Failed %s %d", description, len(failed))))
+		fmt.Println(color.RedString(strings.Join(failed, "\n")))
 	}
 }
