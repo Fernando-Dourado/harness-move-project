@@ -75,7 +75,7 @@ func (api *ApiRequest) listRoles(org, project string) ([]*model.ExistingRoles, e
 			"projectIdentifier": project,
 			"limit":             "100",
 		}).
-		Get(BaseURL + ROLE)
+		Get(api.BaseURL + ROLE)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (api *ApiRequest) createRole(role *model.NewRole) error {
 			"orgIdentifier":     role.OrgIdentifier,
 			"projectIdentifier": role.ProjectIdentifier,
 		}).
-		Post(BaseURL + ROLE)
+		Post(api.BaseURL + ROLE)
 
 	if err != nil {
 		return err

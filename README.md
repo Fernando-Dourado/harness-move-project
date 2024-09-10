@@ -29,7 +29,8 @@ Execute the operation running at the following command in your terminal that wil
 ./harness-move-project \
   --apiToken <SAT_OR_PAT> \
   --accountId <account_identifier> \
-  --csvPath ./exampleCsvFile.csv
+  --csvPath ./exampleCsvFile.csv \
+  --baseUrl https://app.harness.io
 ```
 
 When the tool try to create and entity on target project that the same identifier already exist, it silently ignores the error and continues the execution. Using that strategy you can run it multiple times without side effects.

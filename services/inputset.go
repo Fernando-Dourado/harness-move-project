@@ -77,7 +77,7 @@ func (api *ApiRequest) listInputsets(org, project, pipelineIdentifier string) ([
 			"inputSetType":       "ALL",
 			"size":               "1000",
 		}).
-		Get(BaseURL + "/pipeline/api/inputSets")
+		Get(api.BaseURL + "/pipeline/api/inputSets")
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (api *ApiRequest) getInputset(org, project, pipelineIdentifier, isIdentifie
 			"projectIdentifier":  project,
 			"pipelineIdentifier": pipelineIdentifier,
 		}).
-		Get(BaseURL + "/pipeline/api/inputSets/{inputset}")
+		Get(api.BaseURL + "/pipeline/api/inputSets/{inputset}")
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +135,7 @@ func (api *ApiRequest) createInputset(org, project, pipelineIdentifier, yaml str
 			"projectIdentifier":  project,
 			"pipelineIdentifier": pipelineIdentifier,
 		}).
-		Post(BaseURL + "/pipeline/api/inputSets")
+		Post(api.BaseURL + "/pipeline/api/inputSets")
 	if err != nil {
 		return err
 	}

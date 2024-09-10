@@ -80,7 +80,7 @@ func (api *ApiRequest) listPipelineTriggers(piplineId, org, project string) ([]*
 			"targetIdentifier":  piplineId,
 			"size":              "100",
 		}).
-		Get(BaseURL + TRIGGER)
+		Get(api.BaseURL + TRIGGER)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func (api *ApiRequest) createPipelineTrigger(trigger *model.TriggerContent) erro
 			"projectIdentifier": trigger.ProjectIdentifier,
 			"targetIdentifier":  trigger.Identifier,
 		}).
-		Post(BaseURL + TRIGGER)
+		Post(api.BaseURL + TRIGGER)
 
 	if err != nil {
 		return err

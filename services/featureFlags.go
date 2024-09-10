@@ -91,7 +91,7 @@ func (api *ApiRequest) listFeatureFlags(org, project string) ([]*model.FeatureFl
 			"orgIdentifier":     org,
 			"projectIdentifier": project,
 		}).
-		Get(BaseURL + FEATFLAGS)
+		Get(api.BaseURL + FEATFLAGS)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (api *ApiRequest) createFeatureFlags(featureFlag *model.CreateFeatureFlag) 
 			"orgIdentifier":     featureFlag.OrgIdentifier,
 			"projectIdentifier": featureFlag.ProjectIdentifier,
 		}).
-		Post(BaseURL + FEATFLAGS)
+		Post(api.BaseURL + FEATFLAGS)
 
 	if err != nil {
 		return err

@@ -12,6 +12,7 @@ type (
 	Config struct {
 		Token   string
 		Account string
+		BaseURL string
 	}
 
 	// NOT SURE WHICH NAME TO CHOSE TO THAT TYPE
@@ -33,6 +34,7 @@ func (o *Move) Exec() error {
 		Client:  resty.New(),
 		Token:   o.Config.Token,
 		Account: o.Config.Account,
+		BaseURL: o.Config.BaseURL,
 	}
 
 	var operations []services.Operation

@@ -20,7 +20,7 @@ func (api *ApiRequest) ValidateProject(org, project string) error {
 			"accountIdentifier": api.Account,
 			"orgIdentifier":     org,
 		}).
-		Get(BaseURL + GET_PROJECT)
+		Get(api.BaseURL + GET_PROJECT)
 	if err != nil {
 		return err
 	}
@@ -99,7 +99,7 @@ func (api *ApiRequest) getProject(org, project string) (model.Project, error) {
 			"accountIdentifier": api.Account,
 			"orgIdentifier":     org,
 		}).
-		Get(BaseURL + GET_PROJECT)
+		Get(api.BaseURL + GET_PROJECT)
 
 	if err != nil {
 		return model.Project{}, err
@@ -134,7 +134,7 @@ func (api *ApiRequest) CreateProject(project *model.Project) error {
 			"accountIdentifier": api.Account,
 			"orgIdentifier":     project.OrgIdentifier,
 		}).
-		Post(BaseURL + NEW_PROJECT)
+		Post(api.BaseURL + NEW_PROJECT)
 	if err != nil {
 		return err
 	}

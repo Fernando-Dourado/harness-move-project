@@ -95,7 +95,7 @@ func (api *ApiRequest) listTargetGroups(org, project, envId string) ([]*model.Ta
 			"environmentIdentifier": envId,
 			"size":                  "1000",
 		}).
-		Get(BaseURL + TARGETGROUPS)
+		Get(api.BaseURL + TARGETGROUPS)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,7 @@ func (api *ApiRequest) createTargetGroups(targetGroup *model.NewTargetGroup) err
 			"accountIdentifier": api.Account,
 			"orgIdentifier":     targetGroup.Org,
 		}).
-		Post(BaseURL + TARGETGROUPS)
+		Post(api.BaseURL + TARGETGROUPS)
 	if err != nil {
 		return err
 	}

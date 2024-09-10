@@ -33,6 +33,11 @@ func main() {
 				Usage: "The account ID that contains both the source and target orgnaizations.",
 				Required: true,
 			},
+			&cli.StringFlag{
+				Name:  "baseUrl",
+				Usage: "The URL of the harness instance that your projects reside in.",
+				Required: true,
+			},
 		},
 	}
 	app.Run(os.Args)
@@ -55,6 +60,7 @@ func run(c *cli.Context) error {
 			Config: operation.Config{
 				Token:   c.String("apiToken"),
 				Account: c.String("accountId"),
+				BaseURL: c.String("baseUrl"),
 			},
 			Source: operation.NoName{
 				Org:     csvData.SourceOrg[i],
