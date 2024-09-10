@@ -1,28 +1,40 @@
 # Harness Move
 
-A utility tool to copy/clone/move a project.
+A utility tool to copy/clone a project.
 
 ## Requirements
 
-- The tool does not create the org or project target.
-- As safety operation the tool do not delete the entities from the source project.
+- The tool does not create the target Organization.  It must be pre-existing
+- As safety operation, the tool do not delete the entities from the source project.
 - The `api-key` need to have access to read from the source project and write to the target project.
 
 ## Usage
 
-Execute the operation running at the following command in your terminal
+Execute the operation running at the following command in your terminal that will read from a CSV file. 
 
 ```sh
 ./harness-move-project \
   --api-token <SAT_OR_PAT> \
   --account <account_identifier> \
-  --source-org <org_identifier> --source-project <project_identifier> \
-  --target-org <org_identifier> --target-project <project_identifier>
+  --csvPath ./exampleCsvFile.csv
 ```
 
-If the source and target projects has the same identifier, you can suppress the `--target-project` argument.
+When the tool try to create and entity on target project that the same identifier already exist, it silently ignores the error and continues the execution. Using that strategy you can run it multiple times without side effects.
 
-When the tool try to create and entity on target project that the same identifier already exist, it just ignore the error and keep the execution. Using that strategy you can run it multiple times without side effects.
+## CSV File
+
+You can run this against a single or multiple projects by providing a CSV file with the following format:
+
+| CSV column Name | Description | Required |
+| --------------- | ----------- | -------- |
+| `sourceOrg` | The name of source organization | Yes |
+| `sourceProject` | The name of source project | Yes |
+| `targetOrg` | The name of target organization | Yes |
+| `targetProject` | The name of target project | No |
+
+If the `targetProject` is not provided, the tool will use the `sourceProject` as the target project name.
+
+There is an example CSV file named `exampleCsvFile.csv` that you can update with your project details.
 
 ## Supported Entities
 
@@ -43,12 +55,12 @@ When the tool try to create and entity on target project that the same identifie
 - Triggers & Webhooks (Work in progress)
 - File Store (Working in progress)
 - Feature Flags
+- Feature Flag Targets & Target Groups
 
 ## Not Supported Entities
 
 - Secrets
 - Triggers
-- Connectors
 - Service Overrides
 
 ## Limitation
