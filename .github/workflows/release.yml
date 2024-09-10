@@ -1,6 +1,9 @@
+name: "On Release"
+
 on:
-  release:
-    types: [created]
+  push:
+    branches:
+      - main
 
 jobs:
   releases-matrix:
