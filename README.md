@@ -4,14 +4,14 @@
 
 A utility tool to copy/clone a project.
 
-![](https://img.shields.io/github/v/release/Fernando-Dourado/harness-move-project)
-![](https://img.shields.io/github/release-date/Fernando-Dourado/harness-move-project)
+![](https://img.shields.io/github/v/release/jf781/harness-move-project)
+![](https://img.shields.io/github/release-date/jf781/harness-move-project)
 
 </div>
 
 ## Install
 
-Download the latest version from [releases page](https://github.com/Fernando-Dourado/harness-move-project/releases/latest)
+Download the latest version from [releases page](https://github.com/jf781/harness-move-project/releases/latest)
 
 ## Requirements
 
