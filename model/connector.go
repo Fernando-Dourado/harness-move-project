@@ -64,6 +64,38 @@ type ConnectorSpec struct {
 	AzureEnvironmentType *string                  `json:"azureEnvironmentType,omitempty"`
 	Credentials          interface{}              `json:"credentials"`
 	Default              *bool                    `json:"default,omitempty"`
+	// Vault Connector Details
+	AuthToken                      *string `json:"authTokenRef,omitempty"`
+	VaultUrl                       *string `json:"vaultUrl,omitempty"`
+	BasePath                       *string `json:"basePath,omitempty"`
+	RenewalIntervalMinutes         *int64  `json:"renewalIntervalMinutes,omitempty"`
+	SecretEngineManuallyConfigured *bool   `json:"secretEngine"`
+	SecretEngineName               *string `json:"secretEngineName,omitempty"`
+	AppRoleId                      *string `json:"appRoleId,omitempty"`
+	AppRolePath                    *string `json:"appRolePath,omitempty"`
+	SecretId                       *string `json:"secretId,omitempty"`
+	SecretEngineVerison            *int32  `json:"secretEngineVersion,omitempty"`
+	NameSpace                      *string `json:"namespace,omitempty"`
+	SinkPath                       *string `json:"sinkPath,omitempty"`
+	UseVaultAgent                  *bool   `json:"useVaultAgent,omitempty"`
+	UseAwsIam                      *bool   `json:"useAwsIam,omitempty"`
+	AwsRegion                      *string `json:"awsRegion,omitempty"`
+	VaultAwsIamRole                *string `json:"vaultAwsIamRole,omitempty"`
+	UseK8sAuth                     *bool   `json:"useK8sAuth,omitempty"`
+	VaultK8sAuthRole               *string `json:"vaultK8sAuthRole,omitempty"`
+	ServiceAccountTokenPath        *string `json:"serviceAccountTokenPath,omitempty"`
+	K8sAuthEndpoint                *string `json:"k8sAuthEndpoint,omitempty"`
+	RenewAppRoleToken              *bool   `json:"renewAppRoleToken,omitempty"`
+	EnableCache                    *bool   `json:"enableCache,omitempty"`
+	ReadOnly                       *bool   `json:"readOnly,omitempty"`
+	AccessType                     *string `json:"accessType,omitempty"`
+	NgCertificateRef               *string `json:"ngCertificateRef,omitempty"`
+	XvaultAwsIamServerId           *string `json:"x-vault-aws-iam-server-id,omitempty"`
+	// Git Connector Details
+	BranchName     *string           `json:"branchName,omitempty"`
+	IsAnonymous    *bool             `json:"isAnonymous,omitempty"`
+	ConnectionType *string           `json:"connectionType,omitempty"`
+	Spec           *ConnectorGitSpec `json:"spec,omitempty"`
 }
 
 type ConnectorAPIAccess struct {
@@ -92,8 +124,8 @@ type ConnectorAuthenticationSpec struct {
 }
 
 type ConnectorPurpleSpec struct {
-	Username    string      `json:"username"`
-	UsernameRef interface{} `json:"usernameRef"`
+	Username    string      `json:"username,omitempty"`
+	UsernameRef interface{} `json:"usernameRef,omitempty"`
 	TokenRef    string      `json:"tokenRef"`
 }
 
@@ -151,4 +183,10 @@ type ConnectorStatusError struct {
 	Reason  string `json:"reason"`
 	Message string `json:"message"`
 	Code    int64  `json:"code"`
+}
+
+type ConnectorGitSpec struct {
+	Username    string `json:"username,omitempty"`
+	UsernameRef string `json:"usernameRef,omitempty"`
+	PasswordRef string `json:"tokenRef"`
 }
