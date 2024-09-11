@@ -38,7 +38,7 @@ func (o *Move) Exec() error {
 	}
 
 	var operations []services.Operation
-	
+
 	// SOURCE PORJECT MUST EXIST.  RETURNS AN ERROR IF CAN'T BE FOUND/DOES NOT EXIST.
 	if err := api.ValidateProject(o.Source.Org, o.Source.Project); err != nil {
 		return err
