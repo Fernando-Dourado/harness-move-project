@@ -1,8 +1,8 @@
 package operation
 
 import (
-	"fmt"
 	"encoding/csv"
+	"fmt"
 	"os"
 )
 
@@ -11,12 +11,11 @@ type ImportCSV struct {
 }
 
 type CSV struct {
-	SourceOrg []string
+	SourceOrg     []string
 	SourceProject []string
-	TargetOrg []string
+	TargetOrg     []string
 	TargetProject []string
 }
-
 
 func (m ImportCSV) Exec() (*CSV, error) {
 	// Read the file
