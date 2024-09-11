@@ -20,22 +20,22 @@ type GetRoleAssignmentData struct {
 }
 
 type RoleAssignmentListContent struct {
-	RoleAssignment ExistingRoleAssignment          `json:"roleAssignment"`
+	RoleAssignment ExistingRoleAssignment  `json:"roleAssignment"`
 	Scope          RoleAssignmentPrincipal `json:"scope"`
-	LastModifiedAt int64                           `json:"lastModifiedAt"`
-	HarnessManaged bool                            `json:"harnessManaged"`
+	LastModifiedAt int64                   `json:"lastModifiedAt"`
+	HarnessManaged bool                    `json:"harnessManaged"`
 }
 
 type ExistingRoleAssignment struct {
-	Identifier              string                          `json:"identifier"`
-	ResourceGroupIdentifier string                          `json:"resourceGroupIdentifier"`
-	RoleIdentifier          string                          `json:"roleIdentifier"`
+	Identifier              string                  `json:"identifier"`
+	ResourceGroupIdentifier string                  `json:"resourceGroupIdentifier"`
+	RoleIdentifier          string                  `json:"roleIdentifier"`
 	Principal               RoleAssignmentPrincipal `json:"principal"`
-	Disabled                bool                            `json:"disabled"`
-	Managed                 bool                            `json:"managed"`
-	Internal                bool                            `json:"internal"`
-	OrgIdentifier           string                          `json:"orgIdentifier"`
-	ProjectIdentifier       string                          `json:"projectIdentifier"`
+	Disabled                bool                    `json:"disabled"`
+	Managed                 bool                    `json:"managed"`
+	Internal                bool                    `json:"internal"`
+	OrgIdentifier           string                  `json:"orgIdentifier"`
+	ProjectIdentifier       string                  `json:"projectIdentifier"`
 }
 
 type RoleAssignmentPrincipal struct {
@@ -51,10 +51,10 @@ type RoleAssignmentScope struct {
 }
 
 type NewRoleAssignment struct {
-	Identifier              string                     `json:"identifier"`
-	ResourceGroupIdentifier string                     `json:"resourceGroupIdentifier"`
-	RoleIdentifier          string                     `json:"roleIdentifier"`
+	Identifier              string                  `json:"identifier"`
+	ResourceGroupIdentifier string                  `json:"resourceGroupIdentifier"`
+	RoleIdentifier          string                  `json:"roleIdentifier"`
 	Principal               RoleAssignmentPrincipal `json:"principal"`
-	OrgIdentifier           string                     `json:"orgIdentifier"`
-	ProjectIdentifier       string                     `json:"projectIdentifier"`
+	OrgIdentifier           string                  `json:"orgIdentifier"`
+	ProjectIdentifier       string                  `json:"projectIdentifier"`
 }
