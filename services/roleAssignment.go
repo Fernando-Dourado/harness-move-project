@@ -40,16 +40,11 @@ func (c RoleAssignmentContext) Move() error {
 
 	for _, r := range roleAssignments {
 
-		rolePrincipal := model.NewRoleAssignmentPrincipal{
-			Identifier: r.Principal.Identifier,
-			Type:       r.Principal.Type,
-		}
-
 		role := &model.NewRoleAssignment{
 			Identifier:              r.Identifier,
 			ResourceGroupIdentifier: r.ResourceGroupIdentifier,
 			RoleIdentifier:          r.RoleIdentifier,
-			Principal:               rolePrincipal,
+			Principal:               r.Principal,
 			OrgIdentifier:           c.targetOrg,
 			ProjectIdentifier:       c.targetProject,
 		}
