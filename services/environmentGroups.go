@@ -37,7 +37,7 @@ func (c EnvGroupContext) Move() error {
 		return err
 	}
 
-	bar := progressbar.Default(int64(len(envGroups)), "Triggers    ")
+	bar := progressbar.Default(int64(len(envGroups)), "Environment Groups:    ")
 	var failed []string
 
 	for _, eg := range envGroups {
@@ -60,7 +60,7 @@ func (c EnvGroupContext) Move() error {
 	}
 	bar.Finish()
 
-	reportFailed(failed, "Triggers:")
+	reportFailed(failed, "Environment Groups:")
 	return nil
 }
 
