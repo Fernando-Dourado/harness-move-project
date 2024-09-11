@@ -44,7 +44,7 @@ func (c EnvGroupContext) Move() error {
 
 		e := model.CreateEnvGroup{}
 
-		newYaml := createYaml(eg.EnvGroup.YAML, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
+		newYaml := createYamlQuotes(eg.EnvGroup.YAML, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
 		e.OrgIdentifier = c.targetOrg
 		e.ProjectIdentifier = c.targetProject
 		e.Color = eg.EnvGroup.Color

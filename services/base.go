@@ -41,6 +41,24 @@ func createYaml(yaml, sourceOrg, sourceProject, targetOrg, targetProject string)
 	return out
 }
 
+func createYamlQuotes(yaml, sourceOrg, sourceProject, targetOrg, targetProject string) string {
+	var out string
+
+	if strings.Contains(yaml, "orgIdentifier: ") {
+		out = strings.ReplaceAll(yaml, "orgIdentifier: \""+sourceOrg +"\"", "orgIdentifier: \""+targetOrg+"\"")
+	} else {
+		out = fmt.Sprintln(yaml, " orgIdentifier:", targetOrg)
+	}
+
+	if strings.Contains(yaml, "projectIdentifier: ") {
+		out = strings.ReplaceAll(out, "projectIdentifier: \""+sourceProject, "projectIdentifier: \""+targetProject)
+	} else {
+		out = fmt.Sprintln(yaml, " projectIdentifier:", targetProject)
+	}
+
+	return out
+}
+
 func handleErrorResponse(resp *resty.Response) error {
 	result := model.ErrorResponse{}
 	err := json.Unmarshal(resp.Body(), &result)
