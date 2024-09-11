@@ -13,10 +13,10 @@ var Version = "development"
 
 func main() {
 	app := &cli.App{
-		Name: "harness-copy-project",
+		Name:    "harness-copy-project",
 		Version: Version,
-		Usage: "Non-official Harness CLI to copy project between organizations",
-		Action: run,
+		Usage:   "Non-official Harness CLI to copy project between organizations",
+		Action:  run,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "csvPath",
@@ -24,26 +24,24 @@ func main() {
 				Required: true,
 			},
 			&cli.StringFlag{
-				Name:  "apiToken",
-				Usage: "The API token that will be used to authenticate with the Harness Account.",
+				Name:     "apiToken",
+				Usage:    "The API token that will be used to authenticate with the Harness Account.",
 				Required: true,
 			},
 			&cli.StringFlag{
-				Name:  "accountId",
-				Usage: "The account ID that contains both the source and target orgnaizations.",
+				Name:     "accountId",
+				Usage:    "The account ID that contains both the source and target orgnaizations.",
 				Required: true,
 			},
 			&cli.StringFlag{
-				Name:  "baseUrl",
-				Usage: "The URL of the harness instance that your projects reside in.",
+				Name:     "baseUrl",
+				Usage:    "The URL of the harness instance that your projects reside in.",
 				Required: true,
 			},
 		},
 	}
 	app.Run(os.Args)
 }
-
-
 
 func run(c *cli.Context) error {
 	importCsv := operation.ImportCSV{
@@ -72,8 +70,8 @@ func run(c *cli.Context) error {
 			},
 		}
 
-		 // Check for missing or empty values
-		 if mv.Source.Org == "" || mv.Source.Project == "" || mv.Target.Org == "" {
+		// Check for missing or empty values
+		if mv.Source.Org == "" || mv.Source.Project == "" || mv.Target.Org == "" {
 			fmt.Println("Invalid CSV data. Missing required fields.")
 			continue // Skip this iteration if required data is missing
 		}
@@ -83,7 +81,7 @@ func run(c *cli.Context) error {
 			mv.Target.Project = mv.Source.Project
 		}
 
-		fmt.Println(color.GreenString("Moving project '%v' from org '%v' to org '%v'. The target project will be named '%v'", mv.Source.Project, mv.Source.Org, mv.Target.Org, mv.Target.Project)) 
+		fmt.Println(color.GreenString("Moving project '%v' from org '%v' to org '%v'. The target project will be named '%v'", mv.Source.Project, mv.Source.Org, mv.Target.Org, mv.Target.Project))
 
 		// Execute the copy operation from source to target operation
 		if err := mv.Exec(); err != nil {
