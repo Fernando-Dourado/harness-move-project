@@ -21,7 +21,7 @@ type GetRoleAssignmentData struct {
 
 type RoleAssignmentListContent struct {
 	RoleAssignment ExistingRoleAssignment          `json:"roleAssignment"`
-	Scope          ExistingRoleAssignmentPrincipal `json:"scope"`
+	Scope          RoleAssignmentPrincipal `json:"scope"`
 	LastModifiedAt int64                           `json:"lastModifiedAt"`
 	HarnessManaged bool                            `json:"harnessManaged"`
 }
@@ -30,7 +30,7 @@ type ExistingRoleAssignment struct {
 	Identifier              string                          `json:"identifier"`
 	ResourceGroupIdentifier string                          `json:"resourceGroupIdentifier"`
 	RoleIdentifier          string                          `json:"roleIdentifier"`
-	Principal               ExistingRoleAssignmentPrincipal `json:"principal"`
+	Principal               RoleAssignmentPrincipal `json:"principal"`
 	Disabled                bool                            `json:"disabled"`
 	Managed                 bool                            `json:"managed"`
 	Internal                bool                            `json:"internal"`
@@ -38,7 +38,7 @@ type ExistingRoleAssignment struct {
 	ProjectIdentifier       string                          `json:"projectIdentifier"`
 }
 
-type ExistingRoleAssignmentPrincipal struct {
+type RoleAssignmentPrincipal struct {
 	ScopeLevel *string `json:"scopeLevel"`
 	Identifier string  `json:"identifier"`
 	Type       string  `json:"type"`
@@ -54,12 +54,7 @@ type NewRoleAssignment struct {
 	Identifier              string                     `json:"identifier"`
 	ResourceGroupIdentifier string                     `json:"resourceGroupIdentifier"`
 	RoleIdentifier          string                     `json:"roleIdentifier"`
-	Principal               NewRoleAssignmentPrincipal `json:"principal"`
+	Principal               RoleAssignmentPrincipal `json:"principal"`
 	OrgIdentifier           string                     `json:"orgIdentifier"`
 	ProjectIdentifier       string                     `json:"projectIdentifier"`
-}
-
-type NewRoleAssignmentPrincipal struct {
-	Identifier string `json:"identifier"`
-	Type       string `json:"type"`
 }
