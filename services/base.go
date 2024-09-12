@@ -20,7 +20,7 @@ type ApiRequest struct {
 }
 
 type Operation interface {
-	Move() error
+	Copy() error
 }
 
 func createYaml(yaml, sourceOrg, sourceProject, targetOrg, targetProject string) string {
@@ -45,7 +45,7 @@ func createYamlQuotes(yaml, sourceOrg, sourceProject, targetOrg, targetProject s
 	var out string
 
 	if strings.Contains(yaml, "orgIdentifier: ") {
-		out = strings.ReplaceAll(yaml, "orgIdentifier: \""+sourceOrg +"\"", "orgIdentifier: \""+targetOrg+"\"")
+		out = strings.ReplaceAll(yaml, "orgIdentifier: \""+sourceOrg+"\"", "orgIdentifier: \""+targetOrg+"\"")
 	} else {
 		out = fmt.Sprintln(yaml, " orgIdentifier:", targetOrg)
 	}
@@ -83,4 +83,26 @@ func reportFailed(failed []string, description string) {
 		fmt.Println(color.RedString(fmt.Sprintf("Failed %s %d", description, len(failed))))
 		fmt.Println(color.RedString(strings.Join(failed, "\n")))
 	}
+}
+
+// User for counter operations
+
+var apiCalls int = 0
+
+var projects int = 0
+
+func IncrementApiCalls() {
+	apiCalls++
+}
+
+func GetApiCalls() int {
+	return apiCalls
+}
+
+func IncrementProjects() {
+	projects++
+}
+
+func GetProjects() int {
+	return projects
 }
