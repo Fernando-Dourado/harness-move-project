@@ -10,6 +10,7 @@ import (
 	"github.com/jf781/harness-move-project/services"
 	"github.com/urfave/cli/v2"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var Version = "development"
@@ -19,7 +20,13 @@ var logger *zap.Logger
 func main() {
 
 	// Initlize the logger
-	logger = zap.Must(zap.NewProduction())
+	// logger = zap.Must(zap.NewProduction())
+	config := zap.NewProductionConfig()
+
+	// Set the log level to WARN (or ERROR, if you prefer)
+	config.Level = zap.NewAtomicLevelAt(zapcore.WarnLevel)
+	logger, _ = config.Build()
+
 	startTime := time.Now()
 
 	// Defer the logger and print the final log
