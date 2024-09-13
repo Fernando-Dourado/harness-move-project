@@ -54,7 +54,6 @@ func (c ConnectorContext) Copy() error {
 
 		c.logger.Info("Processing connector",
         zap.String("connectorName", cn.Connector.Name),
-        zap.String("sourceProject", c.sourceProject),
         zap.String("targetProject", c.targetProject),
     )
 
@@ -111,7 +110,7 @@ func (api *ApiRequest) listConnectors(org, project string, logger *zap.Logger) (
 		}).
 		Post(api.BaseURL + CONNECTORLOOKUP)
 	if err != nil {
-		logger.Error("Failed to send request to list connectors",
+		logger.Error("Failed to request to list of connectors",
 			zap.Error(err),
 		)
 		return nil, err
@@ -167,26 +166,25 @@ func (api *ApiRequest) addConnector(connector *model.ConnectorContent, logger *z
 
 	if err != nil {
 		logger.Error("Failed to send request to create ",
-			zap.String("Connector", connector.Connector.Name),
+			zap.String("Connector:", connector.Connector.Name),
 			zap.Error(err),
 		)
 		return err
 	}
 	if resp.IsError() {
-
 		var errorResponse map[string]interface{}
 		if err := json.Unmarshal(resp.Body(), &errorResponse); err == nil {
 			if code, ok := errorResponse["code"].(string); ok && code == "DUPLICATE_FIELD" {
 				// Log as a warning and skip the error
 				logger.Info("Duplicate connector found, ignoring error",
-					zap.String("connectorName", connector.Connector.Name),
+					zap.String("connectorName:", connector.Connector.Name),
 				)
 				return nil
 			}
 		}else{
 			logger.Error(
 				"Error response from API when creating ",
-				zap.String("Connector", connector.Connector.Name),
+				zap.String("Connector:", connector.Connector.Name),
 				zap.String("response",
 					resp.String(),
 				),
