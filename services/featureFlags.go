@@ -176,7 +176,7 @@ func (api *ApiRequest) createFeatureFlags(featureFlag *model.CreateFeatureFlag, 
 	if resp.IsError() {
 		var errorResponse map[string]interface{}
 		if err := json.Unmarshal(resp.Body(), &errorResponse); err == nil {
-			if code, ok := errorResponse["code"].(string); ok && code == "DUPLICATE_FIELD" {
+			if code, ok := errorResponse["code"].(string); ok && code == "409" {
 				// Log as a warning and skip the error
 				logger.Info("Duplicate feature flag found, ignoring error",
 					zap.String("feature flag", featureFlag.Name),
