@@ -2,10 +2,10 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/jf781/harness-move-project/model"
 	"github.com/schollz/progressbar/v3"
+	"go.uber.org/zap"
 )
 
 const ROLEASSIGNMENT = "/authz/api/roleassignments"
@@ -16,29 +16,43 @@ type RoleAssignmentContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	logger        *zap.Logger
 }
 
-func NewRoleAssignmentOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) RoleAssignmentContext {
+func NewRoleAssignmentOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string, logger *zap.Logger) RoleAssignmentContext {
 	return RoleAssignmentContext{
 		api:           api,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
 		targetOrg:     targetOrg,
 		targetProject: targetProject,
+		logger:        logger,
 	}
 }
 
-func (c RoleAssignmentContext) Move() error {
+func (c RoleAssignmentContext) Copy() error {
 
-	roleAssignments, err := c.api.listRoleAssignments(c.sourceOrg, c.sourceProject)
+	c.logger.Info("Copying role assignments",
+		zap.String("project", c.sourceProject),
+	)
+
+	roleAssignments, err := c.api.listRoleAssignments(c.sourceOrg, c.sourceProject, c.logger)
 	if err != nil {
+		c.logger.Error("Failed to retrive role assignments",
+			zap.String("Project", c.sourceProject),
+			zap.Error(err),
+		)
 		return err
 	}
 
 	bar := progressbar.Default(int64(len(roleAssignments)), "Roles Assignments    ")
-	var failed []string
 
 	for _, r := range roleAssignments {
+
+		c.logger.Info("Processing role assignment",
+			zap.String("role assignment", r.RoleIdentifier),
+			zap.String("targetProject", c.targetProject),
+		)
 
 		role := &model.NewRoleAssignment{
 			Identifier:              r.Identifier,
@@ -49,20 +63,29 @@ func (c RoleAssignmentContext) Move() error {
 			ProjectIdentifier:       c.targetProject,
 		}
 
-		err = c.api.createRoleAssignment(role)
+		err = c.api.createRoleAssignment(role, c.logger)
 
 		if err != nil {
-			failed = append(failed, fmt.Sprintln(r.Identifier, "-", err.Error()))
+			c.logger.Error("Failed to create role assignment",
+				zap.String("role assignment", r.Identifier),
+				zap.Error(err),
+			)
 		}
 		bar.Add(1)
 	}
 	bar.Finish()
 
-	reportFailed(failed, "Role Assingments:")
 	return nil
 }
 
-func (api *ApiRequest) listRoleAssignments(org, project string) ([]*model.ExistingRoleAssignment, error) {
+func (api *ApiRequest) listRoleAssignments(org, project string, logger *zap.Logger) ([]*model.ExistingRoleAssignment, error) {
+
+	logger.Info("Fetching role assignments",
+		zap.String("org", org),
+		zap.String("project", project),
+	)
+
+	IncrementApiCalls()
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
@@ -75,15 +98,26 @@ func (api *ApiRequest) listRoleAssignments(org, project string) ([]*model.Existi
 		}).
 		Get(api.BaseURL + ROLEASSIGNMENT)
 	if err != nil {
+		logger.Error("Failed to request to list of role assignments",
+			zap.Error(err),
+		)
 		return nil, err
 	}
 	if resp.IsError() {
+		logger.Error("Error response from API when listing role assignments",
+			zap.String("response",
+				resp.String(),
+			),
+		)
 		return nil, handleErrorResponse(resp)
 	}
 
 	result := model.GetRoleAssignmentResponse{}
 	err = json.Unmarshal(resp.Body(), &result)
 	if err != nil {
+		logger.Error("Failed to parse response from API",
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
@@ -96,7 +130,14 @@ func (api *ApiRequest) listRoleAssignments(org, project string) ([]*model.Existi
 	return roleAssignments, nil
 }
 
-func (api *ApiRequest) createRoleAssignment(role *model.NewRoleAssignment) error {
+func (api *ApiRequest) createRoleAssignment(role *model.NewRoleAssignment, logger *zap.Logger) error {
+
+	logger.Info("Creating role assignment",
+		zap.String("role assignment", role.RoleIdentifier),
+		zap.String("project", role.ProjectIdentifier),
+	)
+
+	IncrementApiCalls()
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
@@ -110,9 +151,31 @@ func (api *ApiRequest) createRoleAssignment(role *model.NewRoleAssignment) error
 		Post(api.BaseURL + ROLEASSIGNMENT)
 
 	if err != nil {
+		logger.Error("Failed to send request to create ",
+			zap.String("Role assignment", role.Identifier),
+			zap.Error(err),
+		)
 		return err
 	}
 	if resp.IsError() {
+		var errorResponse map[string]interface{}
+		if err := json.Unmarshal(resp.Body(), &errorResponse); err == nil {
+			if code, ok := errorResponse["code"].(string); ok && code == "DUPLICATE_FIELD" {
+				// Log as a warning and skip the error
+				logger.Info("Duplicate role assignment found, ignoring error",
+					zap.String("role assignment", role.Identifier),
+				)
+				return nil
+			}
+		} else {
+			logger.Error(
+				"Error response from API when creating ",
+				zap.String("Role assignment", role.Identifier),
+				zap.String("response",
+					resp.String(),
+				),
+			)
+		}
 		return handleErrorResponse(resp)
 	}
 

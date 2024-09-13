@@ -2,7 +2,6 @@ package services
 
 import (
 	"encoding/json"
-	// "fmt"
 
 	"github.com/jf781/harness-move-project/model"
 	"github.com/schollz/progressbar/v3"
@@ -34,28 +33,27 @@ func NewConnectorOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg,
 
 func (c ConnectorContext) Copy() error {
 
-	c.logger.Info("Copying Connectors for ",
-		zap.String("project: ", c.sourceProject),
+	c.logger.Info("Copying Connectors",
+		zap.String("project", c.sourceProject),
 	)
 
 	connectors, err := c.api.listConnectors(c.sourceOrg, c.sourceProject, c.logger)
 	if err != nil {
-		c.logger.Error("Failed to retrive connectors for ",
-			zap.String("Project: ",c.sourceProject),
+		c.logger.Error("Failed to retrive connectors",
+			zap.String("Project", c.sourceProject),
 			zap.Error(err),
 		)
 		return err
 	}
 
 	bar := progressbar.Default(int64(len(connectors)), "Connectors    ")
-	var failed []string
 
 	for _, cn := range connectors {
 
 		c.logger.Info("Processing connector",
-        zap.String("connectorName", cn.Connector.Name),
-        zap.String("targetProject", c.targetProject),
-    )
+			zap.String("connector", cn.Connector.Name),
+			zap.String("targetProject", c.targetProject),
+		)
 
 		cn.Connector.OrgIdentifier = c.targetOrg
 		cn.Connector.ProjectIdentifier = c.targetProject
@@ -64,7 +62,7 @@ func (c ConnectorContext) Copy() error {
 
 		if err != nil {
 			c.logger.Error("Failed to create connector",
-				zap.String("connectorName", cn.Connector.Name),
+				zap.String("connector", cn.Connector.Name),
 				zap.Error(err),
 			)
 			return err
@@ -73,29 +71,15 @@ func (c ConnectorContext) Copy() error {
 	}
 	bar.Finish()
 
-	if len(failed) > 0 {
-    c.logger.Warn("Some connectors failed to copy",
-        zap.Int("failedCount", len(failed)),
-        zap.Strings("failedConnectors", failed),
-    )
-	}
-
-	c.logger.Info("Connector copying process finished",
-			zap.Int("totalConnectors", len(connectors)),
-			zap.Int("failedConnectors", len(failed)),
-	)
-
-	reportFailed(failed, "Connectors:")
 	return nil
 }
 
 func (api *ApiRequest) listConnectors(org, project string, logger *zap.Logger) ([]*model.ConnectorContent, error) {
 
 	logger.Info("Fetching connectors",
-        zap.String("org", org),
-        zap.String("project", project),
+		zap.String("org", org),
+		zap.String("project", project),
 	)
-
 
 	IncrementApiCalls()
 
@@ -116,8 +100,7 @@ func (api *ApiRequest) listConnectors(org, project string, logger *zap.Logger) (
 		return nil, err
 	}
 	if resp.IsError() {
-		logger.Error(
-			"Error response from API when listing connectors",
+		logger.Error("Error response from API when listing connectors",
 			zap.String("response",
 				resp.String(),
 			),
@@ -141,9 +124,9 @@ func (api *ApiRequest) listConnectors(org, project string, logger *zap.Logger) (
 			connectors = append(connectors, &newConnectors)
 		} else {
 			logger.Warn("Skipping connector",
-					zap.String("connectorName", c.Connector.Name),
-					zap.String("status", c.Status.Status),
-					zap.Bool("harnessManaged", c.HarnessManaged),
+				zap.String("connector", c.Connector.Name),
+				zap.String("status", c.Status.Status),
+				zap.Bool("harnessManaged", c.HarnessManaged),
 			)
 		}
 	}
@@ -152,6 +135,11 @@ func (api *ApiRequest) listConnectors(org, project string, logger *zap.Logger) (
 }
 
 func (api *ApiRequest) addConnector(connector *model.ConnectorContent, logger *zap.Logger) error {
+
+	logger.Info("Creating connector",
+		zap.String("connector", connector.Connector.Name),
+		zap.String("project", connector.Connector.ProjectIdentifier),
+	)
 
 	IncrementApiCalls()
 
@@ -166,7 +154,7 @@ func (api *ApiRequest) addConnector(connector *model.ConnectorContent, logger *z
 
 	if err != nil {
 		logger.Error("Failed to send request to create ",
-			zap.String("Connector:", connector.Connector.Name),
+			zap.String("Connector", connector.Connector.Name),
 			zap.Error(err),
 		)
 		return err
@@ -177,14 +165,14 @@ func (api *ApiRequest) addConnector(connector *model.ConnectorContent, logger *z
 			if code, ok := errorResponse["code"].(string); ok && code == "DUPLICATE_FIELD" {
 				// Log as a warning and skip the error
 				logger.Info("Duplicate connector found, ignoring error",
-					zap.String("connectorName:", connector.Connector.Name),
+					zap.String("connector", connector.Connector.Name),
 				)
 				return nil
 			}
-		}else{
+		} else {
 			logger.Error(
 				"Error response from API when creating ",
-				zap.String("Connector:", connector.Connector.Name),
+				zap.String("Connector", connector.Connector.Name),
 				zap.String("response",
 					resp.String(),
 				),

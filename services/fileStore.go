@@ -7,6 +7,7 @@ import (
 
 	"github.com/jf781/harness-move-project/model"
 	"github.com/schollz/progressbar/v3"
+	"go.uber.org/zap"
 )
 
 var bar *progressbar.ProgressBar
@@ -17,22 +18,29 @@ type FileStoreContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	logger        *zap.Logger
 }
 
-func NewFileStoreOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) FileStoreContext {
+func NewFileStoreOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string, logger *zap.Logger) FileStoreContext {
 	return FileStoreContext{
 		api:           api,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
 		targetOrg:     targetOrg,
 		targetProject: targetProject,
+		logger:        logger,
 	}
 }
 
 func (c FileStoreContext) Copy() error {
 
-	nodes, err := c.listNodes("Root", "Root", nil)
+	c.logger.Info("Copying file stores",
+		zap.String("project", c.sourceProject),
+	)
+
+	nodes, err := c.listNodes("Root", "Root", nil, c.logger)
 	if err != nil {
+		c.logger.Error("Failed to list file store nodes", zap.Error(err))
 		return err
 	}
 
@@ -40,7 +48,8 @@ func (c FileStoreContext) Copy() error {
 	var failures []string
 
 	for _, n := range nodes {
-		if err := c.handleNode(n, failures); err != nil {
+		if err := c.handleNode(n, failures, c.logger); err != nil {
+			c.logger.Error("Failed to handle file", zap.Error(err))
 			failures = handeNodeFailure(n, failures, err)
 		}
 		bar.Add(1)
@@ -55,21 +64,24 @@ func handeNodeFailure(node *model.FileStoreNode, failures []string, err error) [
 	return append(failures, fmt.Sprintf("%s (%s) - %s", node.Name, node.Path, err.Error()))
 }
 
-func (c FileStoreContext) handleNode(n *model.FileStoreNode, failures []string) error {
+func (c FileStoreContext) handleNode(n *model.FileStoreNode, failures []string, logger *zap.Logger) error {
 
 	// CREATE FOLDER OR FILE
-	if err := c.createNode(n); err != nil {
+	if err := c.createNode(n, c.logger); err != nil {
+		logger.Error("Failed to create or folder", zap.Error(err))
 		return err
 	}
 
 	// A FILE DON'T HAVE CHILD NODES
 	if n.Type == model.File {
+		logger.Info("File does not have any child nodes")
 		return nil
 	}
 
 	// SEARCH FOR CHILD NODES
-	nodes, err := c.listNodes(n.Identifier, n.Name, &n.ParentIdentifier)
+	nodes, err := c.listNodes(n.Identifier, n.Name, &n.ParentIdentifier, c.logger)
 	if err != nil {
+		logger.Error("Failed identify child nodes", zap.Error(err))
 		return err
 	}
 
@@ -77,7 +89,8 @@ func (c FileStoreContext) handleNode(n *model.FileStoreNode, failures []string) 
 
 	// FOR EACH NODE MAKE A RECURSIVE CALL
 	for _, n := range nodes {
-		if err := c.handleNode(n, failures); err != nil {
+		if err := c.handleNode(n, failures, c.logger); err != nil {
+			logger.Error("Error creating file or directory", zap.Error(err))
 			failures = handeNodeFailure(n, failures, err)
 		}
 		bar.Add(1)
@@ -86,27 +99,30 @@ func (c FileStoreContext) handleNode(n *model.FileStoreNode, failures []string) 
 	return nil
 }
 
-func (c FileStoreContext) createNode(n *model.FileStoreNode) error {
+func (c FileStoreContext) createNode(n *model.FileStoreNode, logger *zap.Logger) error {
 
 	switch n.Type {
 	case model.Folder:
-		return c.createFolder(n)
+		return c.createFolder(n, c.logger)
 	case model.File:
 		// DOWNLOAD FILE
-		b, err := c.downloadFile(n)
+		b, err := c.downloadFile(n, c.logger)
 		if err != nil {
+			logger.Error("Failed download file", zap.Error(err))
 			return err
 		}
 
 		// CREATE/UPLOAD FILE
-		return c.createFile(n, b)
+		return c.createFile(n, b, c.logger)
 
 	default:
 		return fmt.Errorf("unsupported file store node type %s", n.Type)
 	}
 }
 
-func (c FileStoreContext) downloadFile(n *model.FileStoreNode) ([]byte, error) {
+func (c FileStoreContext) downloadFile(n *model.FileStoreNode, logger *zap.Logger) ([]byte, error) {
+
+	IncrementApiCalls()
 
 	resp, err := c.api.Client.R().
 		SetHeader("x-api-key", c.api.Token).
@@ -118,6 +134,9 @@ func (c FileStoreContext) downloadFile(n *model.FileStoreNode) ([]byte, error) {
 		}).
 		Get(c.api.BaseURL + "/ng/api/file-store/files/{identifier}/download")
 	if err != nil {
+		logger.Error("Failed to request download file",
+			zap.Error(err),
+		)
 		return nil, err
 	}
 	if resp.IsError() {
@@ -127,7 +146,9 @@ func (c FileStoreContext) downloadFile(n *model.FileStoreNode) ([]byte, error) {
 	return resp.Body(), nil
 }
 
-func (c FileStoreContext) createFile(n *model.FileStoreNode, b []byte) error {
+func (c FileStoreContext) createFile(n *model.FileStoreNode, b []byte, logger *zap.Logger) error {
+
+	IncrementApiCalls()
 
 	// ENSURE ONLY FILES CAN BE UPLOADED
 	if n.Type != model.File {
@@ -157,6 +178,9 @@ func (c FileStoreContext) createFile(n *model.FileStoreNode, b []byte) error {
 		}).
 		Post(c.api.BaseURL + "/ng/api/file-store")
 	if err != nil {
+		logger.Error("Failed to upload file",
+			zap.Error(err),
+		)
 		return err
 	}
 	if resp.IsError() {
@@ -166,7 +190,9 @@ func (c FileStoreContext) createFile(n *model.FileStoreNode, b []byte) error {
 	return nil
 }
 
-func (c FileStoreContext) createFolder(n *model.FileStoreNode) error {
+func (c FileStoreContext) createFolder(n *model.FileStoreNode, logger *zap.Logger) error {
+
+	IncrementApiCalls()
 
 	// ENSURE ONLY FOLDERS CAN BE CREATED
 	if n.Type != model.Folder {
@@ -191,6 +217,9 @@ func (c FileStoreContext) createFolder(n *model.FileStoreNode) error {
 		}).
 		Post(c.api.BaseURL + "/ng/api/file-store")
 	if err != nil {
+		logger.Error("Failed to create folder",
+			zap.Error(err),
+		)
 		return err
 	}
 	if resp.IsError() {
@@ -200,7 +229,9 @@ func (c FileStoreContext) createFolder(n *model.FileStoreNode) error {
 	return nil
 }
 
-func (c FileStoreContext) listNodes(identifier, name string, parentIdentifier *string) ([]*model.FileStoreNode, error) {
+func (c FileStoreContext) listNodes(identifier, name string, parentIdentifier *string, logger *zap.Logger) ([]*model.FileStoreNode, error) {
+
+	IncrementApiCalls()
 
 	req := model.GetFolderNodesRequest{
 		Identifier:       identifier,
@@ -220,6 +251,9 @@ func (c FileStoreContext) listNodes(identifier, name string, parentIdentifier *s
 		}).
 		Post(c.api.BaseURL + "/ng/api/file-store/folder")
 	if err != nil {
+		logger.Error("Failed to retrieve list of nodes",
+			zap.Error(err),
+		)
 		return nil, err
 	}
 	if resp.IsError() {
