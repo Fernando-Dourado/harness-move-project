@@ -29,7 +29,7 @@ func NewFileStoreOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg,
 	}
 }
 
-func (c FileStoreContext) Move() error {
+func (c FileStoreContext) Copy() error {
 
 	nodes, err := c.listNodes("Root", "Root", nil)
 	if err != nil {
