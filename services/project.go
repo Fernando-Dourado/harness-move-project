@@ -5,12 +5,19 @@ import (
 	"fmt"
 
 	"github.com/jf781/harness-move-project/model"
+	"go.uber.org/zap"
 )
 
 const GET_PROJECT = "/ng/api/projects/{identifier}"
 
 // Validate if the project exists
-func (api *ApiRequest) ValidateProject(org, project string) error {
+func (api *ApiRequest) ValidateProject(org, project string, logger *zap.Logger) error {
+
+	logger.Info("Validating if project exists",
+		zap.String("project", project),
+	)
+
+	IncrementApiCalls()
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
@@ -22,18 +29,31 @@ func (api *ApiRequest) ValidateProject(org, project string) error {
 		}).
 		Get(api.BaseURL + GET_PROJECT)
 	if err != nil {
+		logger.Error("Failed to request project",
+			zap.String("Project", project),
+			zap.Error(err),
+		)
 		return err
 	}
 	if resp.IsError() {
+		logger.Error("Error response from API when listing existing projects",
+			zap.String("response",
+				resp.String(),
+			),
+		)
 		return handleErrorResponse(resp)
 	}
 	result := model.GetProjectResponse{}
 	err = json.Unmarshal(resp.Body(), &result)
 	if err != nil {
+		logger.Error("Failed to parse response from API",
+			zap.Error(err),
+		)
 		return err
 	}
 
 	if result.Data == nil {
+		logger.Error("Project does not exist")
 		return fmt.Errorf("org %s or project %s not exist", org, project)
 	}
 	return nil
@@ -49,25 +69,33 @@ type ProjectContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	logger        *zap.Logger
 }
 
-func NewProjectOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) ProjectContext {
+func NewProjectOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string, logger *zap.Logger) ProjectContext {
 	return ProjectContext{
 		api:           api,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
 		targetOrg:     targetOrg,
 		targetProject: targetProject,
+		logger:        logger,
 	}
 }
 
-func (c ProjectContext) Move() error {
+func (c ProjectContext) Copy() error {
+	c.logger.Info("Creating new project",
+		zap.String("project", c.sourceProject),
+	)
 
-	sourceProject, err := c.api.getProject(c.sourceOrg, c.sourceProject)
+	sourceProject, err := c.api.getProject(c.sourceOrg, c.sourceProject, c.logger)
 	if err != nil {
+		c.logger.Error("Failed to retrive source project",
+			zap.String("Project", c.sourceProject),
+			zap.Error(err),
+		)
 		return err
 	}
-	var failed []string
 
 	newProject := &model.Project{
 		Identifier:    sourceProject.Identifier,
@@ -79,17 +107,25 @@ func (c ProjectContext) Move() error {
 		OrgIdentifier: c.targetOrg,
 	}
 
-	err = c.api.CreateProject(newProject)
+	err = c.api.CreateProject(newProject, c.logger)
 
 	if err != nil {
-		failed = append(failed, fmt.Sprintln(sourceProject.Identifier, "-", err.Error()))
+		c.logger.Error("Failed to create target project ",
+			zap.String("Project", c.targetProject),
+			zap.Error(err),
+		)
 	}
 
-	reportFailed(failed, "Create Project:")
 	return nil
 }
 
-func (api *ApiRequest) getProject(org, project string) (model.Project, error) {
+func (api *ApiRequest) getProject(org, project string, logger *zap.Logger) (model.Project, error) {
+
+	logger.Info("Getting source project",
+		zap.String("project", project),
+	)
+
+	IncrementApiCalls()
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
@@ -102,15 +138,26 @@ func (api *ApiRequest) getProject(org, project string) (model.Project, error) {
 		Get(api.BaseURL + GET_PROJECT)
 
 	if err != nil {
+		logger.Error("Failed to request source project",
+			zap.Error(err),
+		)
 		return model.Project{}, err
 	}
 
 	if resp.IsError() {
+		logger.Error("Error response from API when listing source project",
+			zap.String("response",
+				resp.String(),
+			),
+		)
 		return model.Project{}, handleErrorResponse(resp)
 	}
 	result := model.GetProjectResponse{}
 	err = json.Unmarshal(resp.Body(), &result)
 	if err != nil {
+		logger.Error("Failed to parse response from API",
+			zap.Error(err),
+		)
 		return model.Project{}, err
 	}
 
@@ -120,7 +167,13 @@ func (api *ApiRequest) getProject(org, project string) (model.Project, error) {
 	return existingProject, nil
 }
 
-func (api *ApiRequest) CreateProject(project *model.Project) error {
+func (api *ApiRequest) CreateProject(project *model.Project, logger *zap.Logger) error {
+
+	logger.Info("Creating target project",
+		zap.String("project", project.Name),
+	)
+
+	IncrementApiCalls()
 
 	wrappedProject := model.ProjectWrapper{
 		Project: project,
@@ -136,19 +189,46 @@ func (api *ApiRequest) CreateProject(project *model.Project) error {
 		}).
 		Post(api.BaseURL + NEW_PROJECT)
 	if err != nil {
+		logger.Error("Failed to send request to create ",
+			zap.String("project", project.Name),
+			zap.Error(err),
+		)
 		return err
 	}
 	if resp.IsError() {
+		var errorResponse map[string]interface{}
+		if err := json.Unmarshal(resp.Body(), &errorResponse); err == nil {
+			if code, ok := errorResponse["code"].(string); ok && code == "DUPLICATE_FIELD" {
+				// Log as a warning and skip the error
+				logger.Info("Duplicate project found, ignoring error",
+					zap.String("project", project.Name),
+				)
+				return nil
+			}
+		} else {
+			logger.Error(
+				"Error response from API when creating ",
+				zap.String("project", project.Name),
+				zap.String("response",
+					resp.String(),
+				),
+			)
+		}
 		return handleErrorResponse(resp)
 	}
 	result := model.GetProjectResponse{}
 	err = json.Unmarshal(resp.Body(), &result)
 	if err != nil {
+		logger.Error("Failed to parse response from API",
+			zap.Error(err),
+		)
 		return err
 	}
 
 	if result.Data == nil {
-		return fmt.Errorf(" project %s not exist", project)
+		logger.Error("Failed to validate project exists",
+			zap.Error(err),
+		)
 	}
 	return nil
 }

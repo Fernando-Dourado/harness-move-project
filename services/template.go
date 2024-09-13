@@ -2,10 +2,10 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/jf781/harness-move-project/model"
 	"github.com/schollz/progressbar/v3"
+	"go.uber.org/zap"
 )
 
 const LIST_TEMPLATES_ENDPOINT = "/v1/orgs/{org}/projects/{project}/templates"
@@ -18,22 +18,32 @@ type TemplateContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	logger        *zap.Logger
 }
 
-func NewTemplateOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) TemplateContext {
+func NewTemplateOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string, logger *zap.Logger) TemplateContext {
 	return TemplateContext{
 		api:           api,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
 		targetOrg:     targetOrg,
 		targetProject: targetProject,
+		logger:        logger,
 	}
 }
 
-func (c TemplateContext) Move() error {
+func (c TemplateContext) Copy() error {
 
-	templates, err := c.listTemplates(c.sourceOrg, c.sourceProject)
+	c.logger.Info("Copying template",
+		zap.String("project", c.sourceProject),
+	)
+
+	templates, err := c.listTemplates(c.sourceOrg, c.sourceProject, c.logger)
 	if err != nil {
+		c.logger.Error("Failed to retrive templates",
+			zap.String("Project", c.sourceProject),
+			zap.Error(err),
+		)
 		return err
 	}
 
@@ -41,13 +51,21 @@ func (c TemplateContext) Move() error {
 	var failed []string
 
 	for _, template := range templates {
-		t, err := c.getTemplate(c.sourceOrg, c.sourceProject, template.Identifier, template.VersionLabel)
+
+		c.logger.Info("Processing template",
+			zap.String("template", template.Name),
+			zap.String("targetProject", c.targetProject),
+		)
+		t, err := c.getTemplate(c.sourceOrg, c.sourceProject, template.Identifier, template.VersionLabel, c.logger)
 		if err == nil {
 			newYaml := createYaml(t.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
-			err = c.createTemplate(c.targetOrg, c.targetProject, newYaml)
+			err = c.createTemplate(c.targetOrg, c.targetProject, newYaml, c.logger)
 		}
 		if err != nil {
-			failed = append(failed, fmt.Sprintln(template.Name, "-", err.Error()))
+			c.logger.Error("Failed to create template",
+				zap.String("template", template.Name),
+				zap.Error(err),
+			)
 		}
 		bar.Add(1)
 	}
@@ -57,7 +75,14 @@ func (c TemplateContext) Move() error {
 	return nil
 }
 
-func (c TemplateContext) listTemplates(org, project string) (model.TemplateListResult, error) {
+func (c TemplateContext) listTemplates(org, project string, logger *zap.Logger) (model.TemplateListResult, error) {
+
+	logger.Info("Fetching templates",
+		zap.String("org", org),
+		zap.String("project", project),
+	)
+
+	IncrementApiCalls()
 
 	api := c.api
 	resp, err := api.Client.R().
@@ -74,19 +99,32 @@ func (c TemplateContext) listTemplates(org, project string) (model.TemplateListR
 		return nil, err
 	}
 	if resp.IsError() {
+		logger.Error("Failed to request to list of templates",
+			zap.Error(err),
+		)
 		return nil, handleErrorResponse(resp)
 	}
 
 	result := model.TemplateListResult{}
 	err = json.Unmarshal(resp.Body(), &result)
 	if err != nil {
+		logger.Error("Failed to parse response from API",
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
 	return result, nil
 }
 
-func (c TemplateContext) getTemplate(org, project, templateIdentifier, versionLabel string) (*model.TemplateGetData, error) {
+func (c TemplateContext) getTemplate(org, project, templateIdentifier, versionLabel string, logger *zap.Logger) (*model.TemplateGetData, error) {
+
+	logger.Info("Getting template",
+		zap.String("template", templateIdentifier),
+		zap.String("project", project),
+	)
+
+	IncrementApiCalls()
 
 	api := c.api
 	resp, err := api.Client.R().
@@ -102,22 +140,34 @@ func (c TemplateContext) getTemplate(org, project, templateIdentifier, versionLa
 		}).
 		Get(api.BaseURL + GET_TEMPLATE_ENDPOINT)
 	if err != nil {
+		logger.Error("Failed to request to template",
+			zap.String("template", templateIdentifier),
+			zap.Error(err),
+		)
 		return nil, err
 	}
 	if resp.IsError() {
+		logger.Error("Error response from API when listing templates",
+			zap.String("response",
+				resp.String(),
+			),
+		)
 		return nil, handleErrorResponse(resp)
 	}
 
 	result := model.TemplateGetResult{}
 	err = json.Unmarshal(resp.Body(), &result)
 	if err != nil {
+		logger.Error("Failed to parse response from API",
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
 	return result.Data, nil
 }
 
-func (c TemplateContext) createTemplate(org, project, yaml string) error {
+func (c TemplateContext) createTemplate(org, project, yaml string, logger *zap.Logger) error {
 
 	api := c.api
 	resp, err := api.Client.R().
@@ -131,9 +181,27 @@ func (c TemplateContext) createTemplate(org, project, yaml string) error {
 		}).
 		Post(api.BaseURL + CREATE_TEMPLATE_ENDPOINT)
 	if err != nil {
+		logger.Error("Failed to send request to create ",
+			zap.Error(err),
+		)
 		return err
 	}
 	if resp.IsError() {
+		var errorResponse map[string]interface{}
+		if err := json.Unmarshal(resp.Body(), &errorResponse); err == nil {
+			if code, ok := errorResponse["code"].(string); ok && code == "DUPLICATE_FIELD" {
+				// Log as a warning and skip the error
+				logger.Info("Duplicate template found, ignoring error")
+				return nil
+			}
+		} else {
+			logger.Error(
+				"Error response from API when creating ",
+				zap.String("response",
+					resp.String(),
+				),
+			)
+		}
 		return handleErrorResponse(resp)
 	}
 

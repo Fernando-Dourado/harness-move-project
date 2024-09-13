@@ -2,10 +2,10 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/jf781/harness-move-project/model"
 	"github.com/schollz/progressbar/v3"
+	"go.uber.org/zap"
 )
 
 const CONNECTORLOOKUP = "/ng/api/connectors/listV2"
@@ -17,47 +17,71 @@ type ConnectorContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	logger        *zap.Logger
 }
 
-func NewConnectorOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) ConnectorContext {
+func NewConnectorOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string, logger *zap.Logger) ConnectorContext {
 	return ConnectorContext{
 		api:           api,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
 		targetOrg:     targetOrg,
 		targetProject: targetProject,
+		logger:        logger,
 	}
 }
 
-func (c ConnectorContext) Move() error {
+func (c ConnectorContext) Copy() error {
 
-	connectors, err := c.api.listConnectors(c.sourceOrg, c.sourceProject)
+	c.logger.Info("Copying Connectors",
+		zap.String("project", c.sourceProject),
+	)
+
+	connectors, err := c.api.listConnectors(c.sourceOrg, c.sourceProject, c.logger)
 	if err != nil {
+		c.logger.Error("Failed to retrive connectors",
+			zap.String("Project", c.sourceProject),
+			zap.Error(err),
+		)
 		return err
 	}
 
 	bar := progressbar.Default(int64(len(connectors)), "Connectors    ")
-	var failed []string
 
 	for _, cn := range connectors {
+
+		c.logger.Info("Processing connector",
+			zap.String("connector", cn.Connector.Name),
+			zap.String("targetProject", c.targetProject),
+		)
 
 		cn.Connector.OrgIdentifier = c.targetOrg
 		cn.Connector.ProjectIdentifier = c.targetProject
 
-		err = c.api.addConnector(cn)
+		err = c.api.addConnector(cn, c.logger)
 
 		if err != nil {
-			failed = append(failed, fmt.Sprintln(cn.Connector.Name, "-", err.Error()))
+			c.logger.Error("Failed to create connector",
+				zap.String("connector", cn.Connector.Name),
+				zap.Error(err),
+			)
+			return err
 		}
 		bar.Add(1)
 	}
 	bar.Finish()
 
-	reportFailed(failed, "Connectors:")
 	return nil
 }
 
-func (api *ApiRequest) listConnectors(org, project string) ([]*model.ConnectorContent, error) {
+func (api *ApiRequest) listConnectors(org, project string, logger *zap.Logger) ([]*model.ConnectorContent, error) {
+
+	logger.Info("Fetching connectors",
+		zap.String("org", org),
+		zap.String("project", project),
+	)
+
+	IncrementApiCalls()
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
@@ -70,15 +94,26 @@ func (api *ApiRequest) listConnectors(org, project string) ([]*model.ConnectorCo
 		}).
 		Post(api.BaseURL + CONNECTORLOOKUP)
 	if err != nil {
+		logger.Error("Failed to request to list of connectors",
+			zap.Error(err),
+		)
 		return nil, err
 	}
 	if resp.IsError() {
+		logger.Error("Error response from API when listing connectors",
+			zap.String("response",
+				resp.String(),
+			),
+		)
 		return nil, handleErrorResponse(resp)
 	}
 
 	result := model.ConnectorListResult{}
 	err = json.Unmarshal(resp.Body(), &result)
 	if err != nil {
+		logger.Error("Failed to parse response from API",
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
@@ -88,14 +123,25 @@ func (api *ApiRequest) listConnectors(org, project string) ([]*model.ConnectorCo
 			newConnectors := c
 			connectors = append(connectors, &newConnectors)
 		} else {
-			fmt.Println("Skipping connector - Harness managed or Status is inactive: ", c.Connector.Name)
+			logger.Warn("Skipping connector",
+				zap.String("connector", c.Connector.Name),
+				zap.String("status", c.Status.Status),
+				zap.Bool("harnessManaged", c.HarnessManaged),
+			)
 		}
 	}
 
 	return connectors, nil
 }
 
-func (api *ApiRequest) addConnector(connector *model.ConnectorContent) error {
+func (api *ApiRequest) addConnector(connector *model.ConnectorContent, logger *zap.Logger) error {
+
+	logger.Info("Creating connector",
+		zap.String("connector", connector.Connector.Name),
+		zap.String("project", connector.Connector.ProjectIdentifier),
+	)
+
+	IncrementApiCalls()
 
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
@@ -107,9 +153,31 @@ func (api *ApiRequest) addConnector(connector *model.ConnectorContent) error {
 		Post(api.BaseURL + CONNECTORCREATE)
 
 	if err != nil {
+		logger.Error("Failed to send request to create ",
+			zap.String("Connector", connector.Connector.Name),
+			zap.Error(err),
+		)
 		return err
 	}
 	if resp.IsError() {
+		var errorResponse map[string]interface{}
+		if err := json.Unmarshal(resp.Body(), &errorResponse); err == nil {
+			if code, ok := errorResponse["code"].(string); ok && code == "DUPLICATE_FIELD" {
+				// Log as a warning and skip the error
+				logger.Info("Duplicate connector found, ignoring error",
+					zap.String("connector", connector.Connector.Name),
+				)
+				return nil
+			}
+		} else {
+			logger.Error(
+				"Error response from API when creating ",
+				zap.String("Connector", connector.Connector.Name),
+				zap.String("response",
+					resp.String(),
+				),
+			)
+		}
 		return handleErrorResponse(resp)
 	}
 
