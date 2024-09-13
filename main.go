@@ -28,12 +28,19 @@ func main() {
 		stopTime := time.Now()
 		apiCalls := services.GetApiCalls()
 		projects := services.GetProjects()
-
 		duration := stopTime.Sub(startTime)
+
+		var avgApiCallDuration time.Duration
+		if apiCalls > 0 {
+			avgApiCallDuration = duration / time.Duration(apiCalls)
+		} else {
+			avgApiCallDuration = 0
+		}
 
 		logger.Info("Harness Copy Project has completed.",
 			zap.Int("Number of API Calls: ", apiCalls),
 			zap.String("Run Duration: ", duration.String()),
+			zap.Duration("Average API Call Duration: ", avgApiCallDuration),
 			zap.Int("Number of projects moved: ", projects),
 			zap.String("Stop Time: ", stopTime.Format("12:00:00")),
 		)

@@ -45,7 +45,7 @@ type TargetSegment struct {
 // Also Referenced by Target Groups
 type Rule struct {
 	Attribute string        `json:"attribute"`
-	ID        string         `json:"id"`
+	ID        string        `json:"id"`
 	Negate    bool          `json:"negate"`
 	Op        string        `json:"op"`
 	Values    []interface{} `json:"values"`

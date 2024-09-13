@@ -67,8 +67,7 @@ There is an example CSV file named `exampleCsvFile.csv` that you can update with
 - Role Assignments
 - Resource Groups
 - Connectors
-- Triggers & Webhooks (Work in progress)
-- File Store (Working in progress)
+- Triggers
 - Feature Flags
 - Feature Flag Targets & Target Groups
 - File Store
@@ -76,7 +75,7 @@ There is an example CSV file named `exampleCsvFile.csv` that you can update with
 ## Not Supported Entities
 
 - Secrets
-- Triggers
+- Webhooks
 - Connectors
 - Service Overrides V2
 
