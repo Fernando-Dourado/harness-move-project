@@ -58,11 +58,3 @@ type Cluded struct {
 
 type ExcludedSegment struct {
 }
-
-type Clause struct {
-	Attribute string        `json:"attribute"`
-	ID        int64         `json:"id"`
-	Negate    bool          `json:"negate"`
-	Op        string        `json:"op"`
-	Values    []interface{} `json:"values"`
-}
