@@ -34,6 +34,7 @@ type PipelineListContent struct {
 	StoreType     StoreType   `json:"storeType"`
 	ConnectorRef  *string     `json:"connectorRef,omitempty"`
 	Description   *string     `json:"description,omitempty"`
+	Modules       []string    `json:"modules,omitempty"`
 }
 
 type GitDetails struct {
