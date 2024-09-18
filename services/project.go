@@ -29,7 +29,7 @@ func (api *ApiRequest) ValidateProject(org, project string, logger *zap.Logger) 
 		}).
 		Get(api.BaseURL + GET_PROJECT)
 	if err != nil {
-		logger.Error("Failed to request project",
+		logger.Warn("Failed to request project",
 			zap.String("Project", project),
 			zap.Error(err),
 		)
@@ -53,7 +53,7 @@ func (api *ApiRequest) ValidateProject(org, project string, logger *zap.Logger) 
 	}
 
 	if result.Data == nil {
-		logger.Error("Project does not exist")
+		logger.Warn("Project does not exist.  Will be creating it")
 		return fmt.Errorf("org %s or project %s not exist", org, project)
 	}
 	return nil
