@@ -104,7 +104,6 @@ func GetApiCalls() int {
 	return apiCalls
 }
 
-
 // Projects
 func IncrementProjects() {
 	projects++
@@ -130,7 +129,6 @@ func IncrementConnectorsMoved() {
 	connectorsMoved++
 }
 
-
 // Environments
 func IncrementEnvironmentsTotal() {
 	environmentsTotal++
@@ -147,7 +145,6 @@ func IncrementEnvironmentsMoved() {
 func GetEnvironmentsMoved() int {
 	return environmentsMoved
 }
-
 
 // Environment Groups
 func IncrementEnvironmentGroupsTotal() {
@@ -166,7 +163,6 @@ func GetEnvironmentGroupsMoved() int {
 	return environmentGroupsMoved
 }
 
-
 // Feature Flags
 func IncrementFeatureFlagsTotal() {
 	featureFlagsTotal++
@@ -183,7 +179,6 @@ func IncrementFeatureFlagsMoved() {
 func GetFeatureFlagsMoved() int {
 	return featureFlagsMoved
 }
-
 
 // File Stores
 func IncrementFileStoresTotal() {
@@ -202,7 +197,6 @@ func GetFileStoresMoved() int {
 	return fileStoresMoved
 }
 
-
 // Input Sets
 func IncrementInputSetsTotal() {
 	inputSetTotal++
@@ -219,7 +213,6 @@ func IncrementInputSetsMoved() {
 func GetInputSetsMoved() int {
 	return inputSetMoved
 }
-
 
 // Infrastructure
 func IncrementInfrastructureTotal() {
@@ -238,7 +231,6 @@ func GetInfrastructureMoved() int {
 	return infrastructureMoved
 }
 
-
 // Overrides
 func IncrementOverridesTotal() {
 	overridesTotal++
@@ -255,7 +247,6 @@ func IncrementOverridesMoved() {
 func GetOverridesMoved() int {
 	return overridesMoved
 }
-
 
 // Pipelines
 func IncrementPipelinesTotal() {
@@ -393,7 +384,6 @@ func GetTargetGroupsMoved() int {
 	return targetGroupsMoved
 }
 
-
 // Targets
 func IncrementTargetsTotal() {
 	targetsTotal++
@@ -411,7 +401,6 @@ func GetTargetsMoved() int {
 	return targetsMoved
 }
 
-
 // Templates
 func IncrementTemplatesTotal() {
 	templatesTotal++
@@ -428,7 +417,6 @@ func IncrementTemplatesMoved() {
 func GetTemplatesMoved() int {
 	return templatesMoved
 }
-
 
 // Triggers
 func IncrementTriggersTotal() {

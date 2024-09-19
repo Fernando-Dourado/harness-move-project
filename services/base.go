@@ -84,4 +84,3 @@ func reportFailed(failed []string, description string) {
 		fmt.Println(color.RedString(strings.Join(failed, "\n")))
 	}
 }
-

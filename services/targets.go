@@ -64,7 +64,7 @@ func (c TargetContext) Copy() error {
 		for _, target := range targets {
 
 			IncrementTargetsTotal()
-			
+
 			i := target
 
 			c.logger.Info("Processing target",
