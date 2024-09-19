@@ -45,6 +45,8 @@ func (c ResourceGroupContext) Copy() error {
 
 	for _, rg := range resourceGroups {
 
+		IncrementResourceGroupsTotal()
+
 		c.logger.Info("Processing resource group",
 			zap.String("resource group", rg.Name),
 			zap.String("targetProject", c.targetProject),
@@ -69,6 +71,8 @@ func (c ResourceGroupContext) Copy() error {
 				zap.String("resource group", rg.Name),
 				zap.Error(err),
 			)
+		} else {
+			IncrementResourceGroupsMoved()
 		}
 		bar.Add(1)
 	}

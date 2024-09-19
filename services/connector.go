@@ -50,6 +50,8 @@ func (c ConnectorContext) Copy() error {
 
 	for _, cn := range connectors {
 
+		IncrementConnectorsTotal()
+
 		c.logger.Info("Processing connector",
 			zap.String("connector", cn.Connector.Name),
 			zap.String("targetProject", c.targetProject),
@@ -66,7 +68,10 @@ func (c ConnectorContext) Copy() error {
 				zap.Error(err),
 			)
 			return err
+		} else {
+			IncrementConnectorsMoved()
 		}
+
 		bar.Add(1)
 	}
 	bar.Finish()
@@ -123,7 +128,7 @@ func (api *ApiRequest) listConnectors(org, project string, logger *zap.Logger) (
 			newConnectors := c
 			connectors = append(connectors, &newConnectors)
 		} else {
-			logger.Warn("Skipping connector",
+			logger.Warn("Skipping connector because it is managed by Harness or status is a failed state.",
 				zap.String("connector", c.Connector.Name),
 				zap.String("status", c.Status.Status),
 				zap.Bool("harnessManaged", c.HarnessManaged),

@@ -49,6 +49,8 @@ func (c RoleContext) Copy() error {
 
 	for _, r := range roles {
 
+		IncrementRolesTotal()
+
 		c.logger.Info("Processing role",
 			zap.String("role", r.Name),
 			zap.String("targetProject", c.targetProject),
@@ -72,6 +74,8 @@ func (c RoleContext) Copy() error {
 				zap.String("role", role.Name),
 				zap.Error(err),
 			)
+		} else {
+			IncrementRolesMoved()
 		}
 		bar.Add(1)
 	}

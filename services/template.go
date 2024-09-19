@@ -52,6 +52,8 @@ func (c TemplateContext) Copy() error {
 
 	for _, template := range templates {
 
+		IncrementTemplatesTotal()
+
 		c.logger.Info("Processing template",
 			zap.String("template", template.Name),
 			zap.String("targetProject", c.targetProject),
@@ -66,6 +68,8 @@ func (c TemplateContext) Copy() error {
 				zap.String("template", template.Name),
 				zap.Error(err),
 			)
+		} else {
+			IncrementTemplatesMoved()
 		}
 		bar.Add(1)
 	}

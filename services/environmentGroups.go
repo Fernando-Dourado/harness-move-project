@@ -52,6 +52,8 @@ func (c EnvGroupContext) Copy() error {
 
 	for _, eg := range envGroups {
 
+		IncrementEnvironmentGroupsTotal()
+
 		c.logger.Info("Processing environment group",
 			zap.String("environment group", eg.EnvGroup.Name),
 			zap.String("target project", c.targetProject),
@@ -73,6 +75,8 @@ func (c EnvGroupContext) Copy() error {
 				zap.String("environment group", eg.EnvGroup.Name),
 				zap.Error(err),
 			)
+		} else {
+			IncrementEnvironmentGroupsMoved()
 		}
 		bar.Add(1)
 	}

@@ -60,6 +60,8 @@ func (c InputsetContext) Copy() error {
 
 		for _, inputset := range inputsets {
 
+			IncrementInputSetsTotal()
+
 			c.logger.Info("Processing Inputset",
 				zap.String("inputset", inputset.Name),
 				zap.String("targetProject", c.targetProject),
@@ -76,6 +78,8 @@ func (c InputsetContext) Copy() error {
 					zap.Error(err),
 				)
 				failed = append(failed, fmt.Sprintln(pipeline.Name, "/", err.Error()))
+			} else {
+				IncrementInputSetsMoved()
 			}
 			bar.Add(1)
 		}

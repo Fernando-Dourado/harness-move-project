@@ -50,6 +50,8 @@ func (c UserScopeContext) Copy() error {
 
 	for _, u := range users {
 
+		IncrementUsersTotal()
+
 		c.logger.Info("Processing user",
 			zap.String("user", u.Name),
 			zap.String("sourceProject", c.sourceProject),
@@ -68,6 +70,8 @@ func (c UserScopeContext) Copy() error {
 				zap.String("user", u.Name),
 				zap.Error(err),
 			)
+		} else {
+			IncrementUsersMoved()
 		}
 		bar.Add(1)
 	}

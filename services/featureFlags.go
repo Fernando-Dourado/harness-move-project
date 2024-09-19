@@ -53,6 +53,8 @@ func (c FeatureContext) Copy() error {
 			f.Tags = []string{}
 		}
 
+		IncrementFeatureFlagsTotal()
+
 		c.logger.Info("Processing feature flag",
 			zap.String("feature flag", f.Name),
 			zap.String("targetProject", c.targetProject),
@@ -87,6 +89,8 @@ func (c FeatureContext) Copy() error {
 				zap.Error(err),
 			)
 			return err
+		} else {
+			IncrementFeatureFlagsMoved()
 		}
 		bar.Add(1)
 	}

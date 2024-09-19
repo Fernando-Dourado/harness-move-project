@@ -48,6 +48,8 @@ func (c EnvironmentContext) Copy() error {
 	for _, env := range envs {
 		e := env.Environment
 
+		IncrementEnvironmentsTotal()
+
 		c.logger.Info("Processing environments",
 			zap.String("environemnt", e.Name),
 			zap.String("targetProject", c.targetProject),
@@ -69,6 +71,8 @@ func (c EnvironmentContext) Copy() error {
 				zap.String("environment name", e.Name),
 				zap.Error(err),
 			)
+		} else {
+			IncrementEnvironmentsMoved()
 		}
 		bar.Add(1)
 	}

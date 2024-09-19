@@ -51,6 +51,9 @@ func (c PipelineContext) Copy() error {
 	bar := progressbar.Default(int64(len(pipelines)), "Pipelines   ")
 
 	for _, pipe := range pipelines {
+
+		IncrementPipelinesTotal()
+
 		pipeData, err := c.api.getPipeline(c.sourceOrg, c.sourceProject, pipe.Identifier, c.logger)
 		if err == nil {
 			newYaml := createYaml(pipeData.YAMLPipeline, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
@@ -61,6 +64,8 @@ func (c PipelineContext) Copy() error {
 				zap.String("pipeline", pipe.Name),
 				zap.Error(err),
 			)
+		} else {
+			IncrementConnectorsMoved()
 		}
 		bar.Add(1)
 	}

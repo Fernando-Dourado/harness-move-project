@@ -49,6 +49,8 @@ func (c ServiceAccountContext) Copy() error {
 
 	for _, sa := range serviceAccounts {
 
+		IncrementServiceAccountsTotal()
+
 		c.logger.Info("Processing service account",
 			zap.String("service account", sa.Email),
 			zap.String("targetProject", c.targetProject),
@@ -64,6 +66,8 @@ func (c ServiceAccountContext) Copy() error {
 				zap.String("service account", sa.Email),
 				zap.Error(err),
 			)
+		} else {
+			IncrementServiceAccountsMoved()
 		}
 		bar.Add(1)
 	}

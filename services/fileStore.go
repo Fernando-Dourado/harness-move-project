@@ -48,9 +48,14 @@ func (c FileStoreContext) Copy() error {
 	var failures []string
 
 	for _, n := range nodes {
+
+		IncrementFileStoresTotal()
+
 		if err := c.handleNode(n, failures, c.logger); err != nil {
 			c.logger.Error("Failed to handle file", zap.Error(err))
 			failures = handeNodeFailure(n, failures, err)
+		} else {
+			IncrementFileStoresMoved()
 		}
 		bar.Add(1)
 	}

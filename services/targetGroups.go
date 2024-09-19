@@ -62,6 +62,9 @@ func (c TargetGroupContext) Copy() error {
 		bar.ChangeMax(bar.GetMax() + len(targetGroups))
 
 		for _, targetGroup := range targetGroups {
+
+			IncrementTargetGroupsTotal()
+
 			i := targetGroup
 			c.logger.Info("Processing target group",
 				zap.String("target group", i.Name),
@@ -91,6 +94,8 @@ func (c TargetGroupContext) Copy() error {
 					zap.String("target group", i.Name),
 					zap.Error(err),
 				)
+			} else {
+				IncrementTargetGroupsMoved()
 			}
 			bar.Add(1)
 		}

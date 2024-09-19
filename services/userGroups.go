@@ -56,6 +56,9 @@ func (c UserGroupContext) Copy() error {
 		)
 
 		for i := range g.Users {
+
+			IncrementUserGroupsTotal()
+
 			user := &model.UserGroupLookup{
 				Identifier:        g.Users[i],
 				OrgIdentifier:     c.sourceOrg,
@@ -84,7 +87,8 @@ func (c UserGroupContext) Copy() error {
 				zap.String("group", g.Name),
 				zap.Error(err),
 			)
-
+		} else {
+			IncrementUserGroupsMoved()
 		}
 		bar.Add(1)
 	}

@@ -67,6 +67,8 @@ func (c TagsContext) Copy() error {
 
 	for _, t := range projectTags {
 
+		IncrementTagsTotal()
+
 		c.logger.Info("Processing tag",
 			zap.String("tag", t.Name),
 			zap.String("targetProject", c.targetProject),
@@ -86,6 +88,8 @@ func (c TagsContext) Copy() error {
 				zap.String("tag", t.Name),
 				zap.Error(err),
 			)
+		} else {
+			IncrementTagsMoved()
 		}
 		bar.Add(1)
 	}

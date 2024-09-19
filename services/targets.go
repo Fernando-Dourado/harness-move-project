@@ -62,6 +62,9 @@ func (c TargetContext) Copy() error {
 		bar.ChangeMax(bar.GetMax() + len(targets))
 
 		for _, target := range targets {
+
+			IncrementTargetsTotal()
+			
 			i := target
 
 			c.logger.Info("Processing target",
@@ -84,6 +87,8 @@ func (c TargetContext) Copy() error {
 					zap.String("target", i.Name),
 					zap.Error(err),
 				)
+			} else {
+				IncrementTargetsMoved()
 			}
 			bar.Add(1)
 		}

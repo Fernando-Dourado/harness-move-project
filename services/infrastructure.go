@@ -63,6 +63,8 @@ func (c InfrastructureContext) Copy() error {
 		for _, infra := range infras {
 			i := infra.Infrastructure
 
+			IncrementInfrastructureTotal()
+
 			c.logger.Info("Processing infrastructure",
 				zap.String("infrastructure", i.Name),
 				zap.String("targetProject", c.targetProject),
@@ -85,6 +87,8 @@ func (c InfrastructureContext) Copy() error {
 					zap.String("infrastructure", i.Name),
 					zap.Error(err),
 				)
+			} else {
+				IncrementInfrastructureMoved()
 			}
 			bar.Add(1)
 		}

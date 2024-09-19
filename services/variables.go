@@ -46,6 +46,9 @@ func (c VariableContext) Copy() error {
 	bar := progressbar.Default(int64(len(variables)), "Variables")
 
 	for _, v := range variables {
+
+		IncrementVariablesTotal()
+
 		c.logger.Info("Processing variable",
 			zap.String("variable", v.Name),
 			zap.String("targetProject", c.targetProject),
@@ -62,6 +65,8 @@ func (c VariableContext) Copy() error {
 				zap.String("variable", v.Name),
 				zap.Error(err),
 			)
+		} else {
+			IncrementVariablesMoved()
 		}
 		bar.Add(1)
 	}

@@ -66,6 +66,8 @@ func (c TriggerContext) Copy() error {
 
 	for _, t := range triggers {
 
+		IncrementTriggersTotal()
+
 		c.logger.Info("Processing trigger",
 			zap.String("trigger", t.Name),
 			zap.String("targetProject", c.targetProject),
@@ -83,6 +85,8 @@ func (c TriggerContext) Copy() error {
 				zap.String("trigger", t.Name),
 				zap.Error(err),
 			)
+		} else {
+			IncrementTriggersMoved()
 		}
 		bar.Add(1)
 	}

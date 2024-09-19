@@ -56,6 +56,8 @@ func (c ServiceOverrideContext) Copy() error {
 
 		for _, o := range overrides {
 
+			IncrementOverridesTotal()
+
 			c.logger.Info("Processing service override",
 				zap.String("service override", o.ServiceRef),
 				zap.String("targetProject", c.targetProject),
@@ -79,11 +81,12 @@ func (c ServiceOverrideContext) Copy() error {
 						zap.String("service override", o.ServiceRef),
 						zap.Error(err),
 					)
+				} else {
+					IncrementOverridesMoved()
 				}
 			}
 			bar.Add(1)
 		}
-		bar.Add(1)
 	}
 	bar.Finish()
 
