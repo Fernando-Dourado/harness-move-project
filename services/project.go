@@ -29,14 +29,14 @@ func (api *ApiRequest) ValidateProject(org, project string, logger *zap.Logger) 
 		}).
 		Get(api.BaseURL + GET_PROJECT)
 	if err != nil {
-		logger.Warn("Failed to request project",
+		logger.Error("Failed to request project",
 			zap.String("Project", project),
 			zap.Error(err),
 		)
 		return err
 	}
 	if resp.IsError() {
-		logger.Error("Error response from API when listing existing projects",
+		logger.Warn("Unable to find existing project in organization",
 			zap.String("response",
 				resp.String(),
 			),
@@ -98,8 +98,8 @@ func (c ProjectContext) Copy() error {
 	}
 
 	newProject := &model.Project{
-		Identifier:    sourceProject.Identifier,
-		Name:          sourceProject.Name,
+		Identifier:    c.targetProject,
+		Name:          c.targetProject,
 		Color:         sourceProject.Color,
 		Modules:       sourceProject.Modules,
 		Description:   sourceProject.Description,
