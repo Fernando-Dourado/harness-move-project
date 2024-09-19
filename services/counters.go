@@ -485,3 +485,55 @@ func IncrementVariablesMoved() {
 func GetVariablesMoved() int {
 	return variablesMoved
 }
+
+// Resets all counters
+
+func ResetAllCounters() {
+	apiCalls = 0
+	projects = 0
+	connectorsTotal = 0
+	connectorsMoved = 0
+	environmentsTotal = 0
+	environmentsMoved = 0
+	environmentGroupsTotal = 0
+	environmentGroupsMoved = 0
+	featureFlagsTotal = 0
+	featureFlagsMoved = 0
+	fileStoresTotal = 0
+	fileStoresMoved = 0
+	infrastructureTotal = 0
+	infrastructureMoved = 0
+	inputSetTotal = 0
+	inputSetMoved = 0
+	overridesTotal = 0
+	overridesMoved = 0
+	pipelinesTotal = 0
+	pipelinesMoved = 0
+	resourceGroupsTotal = 0
+	resourceGroupsMoved = 0
+	roleAssignmentsTotal = 0
+	roleAssignmentsMoved = 0
+	rolesTotal = 0
+	rolesMoved = 0
+	servicesTotal = 0
+	servicesMoved = 0
+	serviceAccountsTotal = 0
+	serviceAccountsMoved = 0
+	tagsTotal = 0
+	tagsMoved = 0
+	targetGroupsTotal = 0
+	targetGroupsMoved = 0
+	targetsTotal = 0
+	targetsMoved = 0
+	templatesTotal = 0
+	templatesMoved = 0
+	triggersTotal = 0
+	triggersMoved = 0
+	userGroupsTotal = 0
+	userGroupsMoved = 0
+	usersTotal = 0
+	usersMoved = 0
+	variablesTotal = 0
+	variablesMoved = 0
+
+}
