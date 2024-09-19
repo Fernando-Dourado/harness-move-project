@@ -377,19 +377,19 @@ func GetTagsMoved() int {
 }
 
 // Target Groups
-func IncrementTagetGroupsTotal() {
+func IncrementTargetGroupsTotal() {
 	targetGroupsTotal++
 }
 
-func GetTagetGroupsTotal() int {
+func GetTargetGroupsTotal() int {
 	return targetGroupsTotal
 }
 
-func IncrementTagetGroupsMoved() {
+func IncrementTargetGroupsMoved() {
 	targetGroupsMoved++
 }
 
-func GetTagetGroupsMoved() int {
+func GetTargetGroupsMoved() int {
 	return targetGroupsMoved
 }
 
