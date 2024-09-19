@@ -395,19 +395,19 @@ func GetTargetGroupsMoved() int {
 
 
 // Targets
-func IncrementTagetsTotal() {
+func IncrementTargetsTotal() {
 	targetsTotal++
 }
 
-func GetTagetsTotal() int {
+func GetTargetsTotal() int {
 	return targetsTotal
 }
 
-func IncrementTagetsMoved() {
+func IncrementTargetsMoved() {
 	targetsMoved++
 }
 
-func GetTagetsMoved() int {
+func GetTargetsMoved() int {
 	return targetsMoved
 }
 
@@ -452,7 +452,7 @@ func IncrementUserGroupsTotal() {
 	userGroupsTotal++
 }
 
-func GetTriggerUserGroupsTotal() int {
+func GetUserGroupsTotal() int {
 	return userGroupsTotal
 }
 
@@ -464,12 +464,12 @@ func GetUserGroupsMoved() int {
 	return userGroupsMoved
 }
 
-// User Groups
+// Users
 func IncrementUsersTotal() {
 	usersTotal++
 }
 
-func GetTriggerUsersTotal() int {
+func GetUsersTotal() int {
 	return usersTotal
 }
 
