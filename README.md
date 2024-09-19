@@ -33,6 +33,18 @@ Execute the operation running at the following command in your terminal that wil
   --baseUrl https://app.harness.io
 ```
 
+By default it will only create the target project in the target organization. It will not copy any of the components to the target organization.  
+
+You have the option to copy only Continuous Delivery or Feature Flag components, or both setting the follow parameters.  You can set both to true if you want to copy all components. 
+
+```sh
+--copyCDComponents true
+```
+
+```sh
+--copyFFComponents true
+```
+
 When the tool try to create and entity on target project that the same identifier already exist, it silently ignores the error and continues the execution. Using that strategy you can run it multiple times without side effects.
 
 ## CSV File

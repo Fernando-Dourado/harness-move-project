@@ -81,6 +81,18 @@ func main() {
 				Usage:    "The URL of the harness instance that your projects reside in.",
 				Required: true,
 			},
+			&cli.BoolFlag{
+				Name:     "copyCDComponents",
+				Usage:    "The if set to 'true', then it will copy the Continuous Delivery components.",
+				Required: false,
+				Value:    false,
+			},
+			&cli.BoolFlag{
+				Name:     "copyFFComponents",
+				Usage:    "The if set to 'true, then it will copy the Feature Flag components.",
+				Required: false,
+				Value:    false,
+			},
 		},
 	}
 
@@ -113,6 +125,8 @@ func run(c *cli.Context) error {
 				Account: c.String("accountId"),
 				BaseURL: c.String("baseUrl"),
 				Logger:  logger,
+				CopyCD:  c.Bool("copyCDComponents"),
+				CopyFF:  c.Bool("copyFFComponents"),
 			},
 			Source: operation.NoName{
 				Org:     csvData.SourceOrg[i],
