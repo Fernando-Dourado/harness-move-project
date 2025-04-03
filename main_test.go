@@ -9,7 +9,7 @@ import (
 
 func TestArgumentRule_EmptyTargetProject(t *testing.T) {
 	mv := operation.Move{
-		Source: operation.Config{
+		Source: operation.CopyConfig{
 			Project: "ProjectA",
 		},
 	}
@@ -20,10 +20,10 @@ func TestArgumentRule_EmptyTargetProject(t *testing.T) {
 
 func TestArgumentRule_NonEmptyTargetProject(t *testing.T) {
 	mv := operation.Move{
-		Source: operation.Config{
+		Source: operation.CopyConfig{
 			Project: "ProjectA",
 		},
-		Target: operation.Config{
+		Target: operation.CopyConfig{
 			Project: "ProjectB",
 		},
 	}
@@ -36,7 +36,7 @@ func TestArgumentRule_NonEmptyTargetProject(t *testing.T) {
 
 func TestArgumentRule_EmptyTargetAccount(t *testing.T) {
 	mv := operation.Move{
-		Source: operation.Config{
+		Source: operation.CopyConfig{
 			Account: "AccountA",
 			Token:   "TokenA",
 		},

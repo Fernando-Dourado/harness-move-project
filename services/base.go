@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -12,20 +13,37 @@ import (
 
 const BaseURL = "https://app.harness.io"
 
+var (
+	ErrEntityNotFound = errors.New("entity not found")
+)
+
 type SourceRequest struct {
-	Client *resty.Client
+	Client  *resty.Client
 	Token   string
 	Account string
 }
 
 type TargetRequest struct {
-	Client *resty.Client
+	Client  *resty.Client
 	Token   string
 	Account string
 }
 
+type SourceTarget struct {
+	SourceOrg     string
+	SourceProject string
+	TargetOrg     string
+	TargetProject string
+}
+
 type Operation interface {
 	Move() error
+}
+
+type OperationFactory interface {
+	NewProjectOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) ProjectContext
+
+	NewVariableOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) VariableContext
 }
 
 func createYaml(yaml, sourceOrg, sourceProject, targetOrg, targetProject string) string {
@@ -51,6 +69,9 @@ func handleErrorResponse(resp *resty.Response) error {
 	err := json.Unmarshal(resp.Body(), &result)
 	if err != nil {
 		return err
+	}
+	if result.Code == "ENTITY_NOT_FOUND" {
+		return ErrEntityNotFound
 	}
 	if result.Code == "DUPLICATE_FIELD" {
 		return nil

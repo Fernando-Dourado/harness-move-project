@@ -59,23 +59,31 @@ func main() {
 			Usage:    "The account identifier associated with the target system. Not required if the target account is the same as the source account.",
 			Required: false,
 		},
+		cli.StringFlag{
+			Name:     "create-project",
+			Usage:    "Creates the project in the target account and org if it does not exist.",
+			Required: false,
+		},
 	}
 	app.Run(os.Args)
 }
 
 func run(c *cli.Context) {
 	mv := operation.Move{
-		Source: operation.Config{
+		Source: operation.CopyConfig{
 			Org:     c.String("source-org"),
 			Project: c.String("source-project"),
 			Token:   c.String("api-token"),
 			Account: c.String("account"),
 		},
-		Target: operation.Config{
+		Target: operation.CopyConfig{
 			Org:     c.String("target-org"),
 			Project: c.String("target-project"),
 			Token:   c.String("target-token"),
 			Account: c.String("target-account"),
+		},
+		Config: operation.OperationConfig{
+			CreateProject: c.Bool("create-project"),
 		},
 	}
 

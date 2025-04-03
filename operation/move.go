@@ -1,6 +1,7 @@
 package operation
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/Fernando-Dourado/harness-move-project/services"
@@ -9,8 +10,11 @@ import (
 )
 
 type (
-	// NOT SURE WHICH NAME TO CHOSE TO THAT TYPE
-	Config struct {
+	OperationConfig struct {
+		CreateProject bool
+	}
+
+	CopyConfig struct {
 		Token   string
 		Account string
 		Org     string
@@ -18,8 +22,9 @@ type (
 	}
 
 	Move struct {
-		Source Config
-		Target Config
+		Source CopyConfig
+		Target CopyConfig
+		Config OperationConfig
 	}
 )
 
@@ -43,11 +48,20 @@ func (o *Move) Exec() error {
 		return err
 	}
 	if err := targetApi.ValidateTarget(o.Target.Org, o.Target.Project); err != nil {
-		return err
+		if err = o.createProjectWhenRequired(&sourceApi, &targetApi, err); err != nil {
+			return err
+		}
+	}
+
+	st := &services.SourceTarget{
+		SourceOrg:     o.Source.Org,
+		SourceProject: o.Source.Project,
+		TargetOrg:     o.Target.Org,
+		TargetProject: o.Target.Project,
 	}
 
 	var operations []services.Operation
-	operations = append(operations, services.NewVariableOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewVariableOperation(&sourceApi, &targetApi, st))
 	operations = append(operations, services.NewFileStoreOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
 	operations = append(operations, services.NewEnvironmentOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
 	operations = append(operations, services.NewInfrastructureOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
@@ -65,4 +79,24 @@ func (o *Move) Exec() error {
 
 	fmt.Println(color.GreenString("Done"))
 	return nil
+}
+
+func (o *Move) createProjectWhenRequired(sourceApi *services.SourceRequest, targetApi *services.TargetRequest, err error) error {
+
+	if o.Config.CreateProject && errors.Is(err, services.ErrEntityNotFound) {
+		fmt.Println("Creating project in target...")
+
+		err = services.NewProjectOperation(sourceApi, targetApi, &services.SourceTarget{
+			SourceOrg:     o.Source.Org,
+			SourceProject: o.Source.Project,
+			TargetOrg:     o.Target.Org,
+			TargetProject: o.Target.Project,
+		}).Move()
+
+		if err == nil {
+			fmt.Println(color.GreenString("Project %s created in target org %s", o.Target.Project, o.Target.Org))
+			return nil
+		}
+	}
+	return err
 }
