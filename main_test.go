@@ -9,7 +9,7 @@ import (
 
 func TestArgumentRule_EmptyTargetProject(t *testing.T) {
 	mv := operation.Move{
-		Source: operation.NoName{
+		Source: operation.Config{
 			Project: "ProjectA",
 		},
 	}
@@ -20,10 +20,10 @@ func TestArgumentRule_EmptyTargetProject(t *testing.T) {
 
 func TestArgumentRule_NonEmptyTargetProject(t *testing.T) {
 	mv := operation.Move{
-		Source: operation.NoName{
+		Source: operation.Config{
 			Project: "ProjectA",
 		},
-		Target: operation.NoName{
+		Target: operation.Config{
 			Project: "ProjectB",
 		},
 	}
@@ -32,4 +32,17 @@ func TestArgumentRule_NonEmptyTargetProject(t *testing.T) {
 	assert.NotEqual(t, mv.Source.Project, mv.Target.Project)
 	assert.Equal(t, mv.Source.Project, "ProjectA")
 	assert.Equal(t, mv.Target.Project, "ProjectB")
+}
+
+func TestArgumentRule_EmptyTargetAccount(t *testing.T) {
+	mv := operation.Move{
+		Source: operation.Config{
+			Account: "AccountA",
+			Token:   "TokenA",
+		},
+	}
+	applyArgumentRules(&mv)
+
+	assert.Equal(t, mv.Source.Project, mv.Target.Project)
+	assert.Equal(t, mv.Source.Token, mv.Target.Token)
 }

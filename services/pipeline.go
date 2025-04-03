@@ -13,16 +13,18 @@ const GET_PIPELINE = "/pipeline/api/pipelines/%s"
 const CREATE_PIPELINE = "/pipeline/api/pipelines/v2"
 
 type PipelineContext struct {
-	api           *ApiRequest
+	source        *SourceRequest
+	target        *TargetRequest
 	sourceOrg     string
 	sourceProject string
 	targetOrg     string
 	targetProject string
 }
 
-func NewPipelineOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) PipelineContext {
+func NewPipelineOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) PipelineContext {
 	return PipelineContext{
-		api:           api,
+		source:        sourceApi,
+		target:        targetApi,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
 		targetOrg:     targetOrg,
@@ -32,7 +34,7 @@ func NewPipelineOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, 
 
 func (c PipelineContext) Move() error {
 
-	pipelines, err := c.api.listPipelines(c.sourceOrg, c.sourceProject)
+	pipelines, err := c.source.listPipelines(c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return err
 	}
@@ -41,10 +43,10 @@ func (c PipelineContext) Move() error {
 	var failed []string
 
 	for _, pipe := range pipelines {
-		pipeData, err := c.api.getPipeline(c.sourceOrg, c.sourceProject, pipe.Identifier)
+		pipeData, err := c.getPipeline(c.sourceOrg, c.sourceProject, pipe.Identifier)
 		if err == nil {
 			newYaml := createYaml(pipeData.YAMLPipeline, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
-			err = c.api.createPipeline(c.targetOrg, c.targetProject, newYaml)
+			err = c.createPipeline(c.targetOrg, c.targetProject, newYaml)
 		}
 		if err != nil {
 			failed = append(failed, fmt.Sprintln(pipe.Name, "-", err.Error()))
@@ -57,14 +59,14 @@ func (c PipelineContext) Move() error {
 	return nil
 }
 
-func (api *ApiRequest) listPipelines(org, project string) ([]*model.PipelineListContent, error) {
+func (s *SourceRequest) listPipelines(org, project string) ([]*model.PipelineListContent, error) {
 
-	resp, err := api.Client.R().
-		SetHeader("x-api-key", api.Token).
+	resp, err := s.Client.R().
+		SetHeader("x-api-key", s.Token).
 		SetHeader("Content-Type", "application/json").
 		SetBody(`{"filterType": "PipelineSetup"}`).
 		SetQueryParams(map[string]string{
-			"accountIdentifier": api.Account,
+			"accountIdentifier": s.Account,
 			"orgIdentifier":     org,
 			"projectIdentifier": project,
 			"size":              "1000",
@@ -86,8 +88,9 @@ func (api *ApiRequest) listPipelines(org, project string) ([]*model.PipelineList
 	return result.Data.Content, nil
 }
 
-func (api *ApiRequest) getPipeline(org, project, pipeIdentifier string) (*model.PipelineGetData, error) {
+func (c PipelineContext) getPipeline(org, project, pipeIdentifier string) (*model.PipelineGetData, error) {
 
+	api := c.source
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Load-From-Cache", "false").
@@ -113,8 +116,9 @@ func (api *ApiRequest) getPipeline(org, project, pipeIdentifier string) (*model.
 	return result.Data, nil
 }
 
-func (api *ApiRequest) createPipeline(org, project, yaml string) error {
+func (c PipelineContext) createPipeline(org, project, yaml string) error {
 
+	api := c.target
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/yaml").

@@ -12,16 +12,18 @@ const LIST_SERVICES = "/ng/api/servicesV2"
 const CREATE_SERVICES = "/ng/api/servicesV2"
 
 type ServiceContext struct {
-	api           *ApiRequest
+	source        *SourceRequest
+	target        *TargetRequest
 	sourceOrg     string
 	sourceProject string
 	targetOrg     string
 	targetProject string
 }
 
-func NewServiceOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) ServiceContext {
+func NewServiceOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) ServiceContext {
 	return ServiceContext{
-		api:           api,
+		source:        sourceApi,
+		target:        targetApi,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
 		targetOrg:     targetOrg,
@@ -31,7 +33,7 @@ func NewServiceOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, t
 
 func (c ServiceContext) Move() error {
 
-	services, err := c.listServices(c.sourceOrg, c.sourceProject)
+	services, err := listServices(c.source, c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return err
 	}
@@ -49,7 +51,7 @@ func (c ServiceContext) Move() error {
 			Description:       s.Service.Description,
 			Yaml:              newYaml,
 		}
-		if err := c.createService(service); err != nil {
+		if err := createService(c.target, service); err != nil {
 			failed = append(failed, fmt.Sprintln(s.Service.Name, "-", err.Error()))
 		}
 		bar.Add(1)
@@ -60,14 +62,13 @@ func (c ServiceContext) Move() error {
 	return nil
 }
 
-func (c ServiceContext) listServices(org, project string) ([]*model.ServiceListContent, error) {
+func listServices(s *SourceRequest, org, project string) ([]*model.ServiceListContent, error) {
 
-	api := c.api
-	resp, err := api.Client.R().
-		SetHeader("x-api-key", api.Token).
+	resp, err := s.Client.R().
+		SetHeader("x-api-key", s.Token).
 		SetHeader("Content-Type", "application/json").
 		SetQueryParams(map[string]string{
-			"accountIdentifier": api.Account,
+			"accountIdentifier": s.Account,
 			"orgIdentifier":     org,
 			"projectIdentifier": project,
 			"size":              "1000",
@@ -89,15 +90,14 @@ func (c ServiceContext) listServices(org, project string) ([]*model.ServiceListC
 	return result.Data.Content, nil
 }
 
-func (c ServiceContext) createService(service *model.CreateServiceRequest) error {
+func createService(t *TargetRequest, service *model.CreateServiceRequest) error {
 
-	api := c.api
-	resp, err := api.Client.R().
-		SetHeader("x-api-key", api.Token).
+	resp, err := t.Client.R().
+		SetHeader("x-api-key", t.Token).
 		SetHeader("Content-Type", "application/json").
 		SetBody(service).
 		SetQueryParams(map[string]string{
-			"accountIdentifier": api.Account,
+			"accountIdentifier": t.Account,
 		}).
 		Post(BaseURL + CREATE_SERVICES)
 	if err != nil {

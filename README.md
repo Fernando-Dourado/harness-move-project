@@ -36,6 +36,8 @@ If the source and target projects has the same identifier, you can suppress the 
 
 When the tool try to create and entity on target project that the same identifier already exist, it just ignore the error and keep the execution. Using that strategy you can run it multiple times without side effects.
 
+It is also possible to perform the copy between different accounts. To do this, you need to specify the `--target-account` and `--target-token` of the target account.
+
 ## Supported Entities
 
 - Variables

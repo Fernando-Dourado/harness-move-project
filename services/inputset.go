@@ -9,16 +9,18 @@ import (
 )
 
 type InputsetContext struct {
-	api           *ApiRequest
+	source        *SourceRequest
+	target        *TargetRequest
 	sourceOrg     string
 	sourceProject string
 	targetOrg     string
 	targetProject string
 }
 
-func NewInputsetOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) InputsetContext {
+func NewInputsetOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) InputsetContext {
 	return InputsetContext{
-		api:           api,
+		source:        sourceApi,
+		target:        targetApi,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
 		targetOrg:     targetOrg,
@@ -28,7 +30,7 @@ func NewInputsetOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, 
 
 func (c InputsetContext) Move() error {
 
-	pipelines, err := c.api.listPipelines(c.sourceOrg, c.sourceProject)
+	pipelines, err := c.source.listPipelines(c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return err
 	}
@@ -37,7 +39,7 @@ func (c InputsetContext) Move() error {
 	var failed []string
 
 	for _, pipeline := range pipelines {
-		inputsets, err := c.api.listInputsets(c.sourceOrg, c.sourceProject, pipeline.Identifier)
+		inputsets, err := c.listInputsets(c.sourceOrg, c.sourceProject, pipeline.Identifier)
 		if err != nil {
 			failed = append(failed, fmt.Sprintf("Unable to list inputsets for pipeline %s [%s]", pipeline.Name, err))
 			continue
@@ -46,10 +48,10 @@ func (c InputsetContext) Move() error {
 		bar.ChangeMax(bar.GetMax() + len(inputsets))
 
 		for _, inputset := range inputsets {
-			is, err := c.api.getInputset(c.sourceOrg, c.sourceProject, pipeline.Identifier, inputset.Identifier)
+			is, err := c.getInputset(c.sourceOrg, c.sourceProject, pipeline.Identifier, inputset.Identifier)
 			if err == nil {
 				newYaml := createYaml(is.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
-				err = c.api.createInputset(c.targetOrg, c.targetProject, pipeline.Identifier, newYaml)
+				err = c.createInputset(c.targetOrg, c.targetProject, pipeline.Identifier, newYaml)
 			}
 			if err != nil {
 				failed = append(failed, fmt.Sprintln(pipeline.Name, "/", err.Error()))
@@ -64,8 +66,9 @@ func (c InputsetContext) Move() error {
 	return nil
 }
 
-func (api *ApiRequest) listInputsets(org, project, pipelineIdentifier string) ([]*model.ListInputsetContent, error) {
+func (c InputsetContext) listInputsets(org, project, pipelineIdentifier string) ([]*model.ListInputsetContent, error) {
 
+	api := c.source
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").
@@ -94,8 +97,9 @@ func (api *ApiRequest) listInputsets(org, project, pipelineIdentifier string) ([
 	return result.Data.Content, nil
 }
 
-func (api *ApiRequest) getInputset(org, project, pipelineIdentifier, isIdentifier string) (*model.GetInputsetData, error) {
+func (c InputsetContext) getInputset(org, project, pipelineIdentifier, isIdentifier string) (*model.GetInputsetData, error) {
 
+	api := c.source
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").
@@ -123,8 +127,9 @@ func (api *ApiRequest) getInputset(org, project, pipelineIdentifier, isIdentifie
 	return result.Data, nil
 }
 
-func (api *ApiRequest) createInputset(org, project, pipelineIdentifier, yaml string) error {
+func (c InputsetContext) createInputset(org, project, pipelineIdentifier, yaml string) error {
 
+	api := c.target
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/yaml").

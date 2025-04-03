@@ -9,16 +9,18 @@ import (
 )
 
 type InfrastructureContext struct {
-	api           *ApiRequest
+	source        *SourceRequest
+	target        *TargetRequest
 	sourceOrg     string
 	sourceProject string
 	targetOrg     string
 	targetProject string
 }
 
-func NewInfrastructureOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) InfrastructureContext {
+func NewInfrastructureOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) InfrastructureContext {
 	return InfrastructureContext{
-		api:           api,
+		source:        sourceApi,
+		target:        targetApi,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
 		targetOrg:     targetOrg,
@@ -28,7 +30,7 @@ func NewInfrastructureOperation(api *ApiRequest, sourceOrg, sourceProject, targe
 
 func (c InfrastructureContext) Move() error {
 
-	envs, err := c.api.listEnvironments(c.sourceOrg, c.sourceProject)
+	envs, err := c.source.listEnvironments(c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return err
 	}
@@ -38,7 +40,7 @@ func (c InfrastructureContext) Move() error {
 
 	for _, env := range envs {
 		e := env.Environment
-		infras, err := c.api.listInfraDef(c.sourceOrg, c.sourceProject, e.Identifier)
+		infras, err := listInfraDef(c.source, c.sourceOrg, c.sourceProject, e.Identifier)
 		if err != nil {
 			failed = append(failed, fmt.Sprintf("Unable to list infrastructures for environment %s [%s]", env.Environment.Name, err))
 			continue
@@ -50,7 +52,7 @@ func (c InfrastructureContext) Move() error {
 			i := infra.Infrastructure
 			newYaml := createYaml(i.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
 
-			err := c.api.createInfrastructure(&model.CreateInfrastructureRequest{
+			err := createInfrastructure(c.target, &model.CreateInfrastructureRequest{
 				Name:              i.Name,
 				Identifier:        i.Identifier,
 				OrgIdentifier:     c.targetOrg,
@@ -74,13 +76,13 @@ func (c InfrastructureContext) Move() error {
 	return nil
 }
 
-func (api *ApiRequest) listInfraDef(org, project, envId string) ([]*model.InfraDefListContent, error) {
+func listInfraDef(s *SourceRequest, org, project, envId string) ([]*model.InfraDefListContent, error) {
 
-	resp, err := api.Client.R().
-		SetHeader("x-api-key", api.Token).
+	resp, err := s.Client.R().
+		SetHeader("x-api-key", s.Token).
 		SetHeader("Content-Type", "application/json").
 		SetQueryParams(map[string]string{
-			"accountIdentifier":     api.Account,
+			"accountIdentifier":     s.Account,
 			"orgIdentifier":         org,
 			"projectIdentifier":     project,
 			"environmentIdentifier": envId,
@@ -103,14 +105,14 @@ func (api *ApiRequest) listInfraDef(org, project, envId string) ([]*model.InfraD
 	return result.Data.Content, nil
 }
 
-func (api *ApiRequest) createInfrastructure(infra *model.CreateInfrastructureRequest) error {
+func createInfrastructure(t *TargetRequest, infra *model.CreateInfrastructureRequest) error {
 
-	resp, err := api.Client.R().
-		SetHeader("x-api-key", api.Token).
+	resp, err := t.Client.R().
+		SetHeader("x-api-key", t.Token).
 		SetHeader("Content-Type", "application/json").
 		SetBody(infra).
 		SetQueryParams(map[string]string{
-			"accountIdentifier": api.Account,
+			"accountIdentifier": t.Account,
 		}).
 		Post(BaseURL + "/ng/api/infrastructures")
 	if err != nil {

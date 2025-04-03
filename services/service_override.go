@@ -9,16 +9,18 @@ import (
 )
 
 type ServiceOverrideContext struct {
-	api           *ApiRequest
+	source        *SourceRequest
+	target        *TargetRequest
 	sourceOrg     string
 	sourceProject string
 	targetOrg     string
 	targetProject string
 }
 
-func NewServiceOverrideOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) ServiceOverrideContext {
+func NewServiceOverrideOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) ServiceOverrideContext {
 	return ServiceOverrideContext{
-		api:           api,
+		source:        sourceApi,
+		target:        targetApi,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
 		targetOrg:     targetOrg,
@@ -28,7 +30,7 @@ func NewServiceOverrideOperation(api *ApiRequest, sourceOrg, sourceProject, targ
 
 func (c ServiceOverrideContext) Move() error {
 
-	envs, err := c.api.listEnvironments(c.sourceOrg, c.sourceProject)
+	envs, err := c.source.listEnvironments(c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return err
 	}
@@ -38,7 +40,7 @@ func (c ServiceOverrideContext) Move() error {
 
 	for _, env := range envs {
 		e := env.Environment
-		overrides, err := c.api.listServiceOverrides(c.sourceOrg, c.sourceProject, e.Identifier)
+		overrides, err := listServiceOverrides(c.source, c.sourceOrg, c.sourceProject, e.Identifier)
 		if err != nil {
 			failed = append(failed, fmt.Sprintf("Unable to list service overrides for environment %s [%s]", env.Environment.Name, err))
 			continue
@@ -50,7 +52,7 @@ func (c ServiceOverrideContext) Move() error {
 			if len(o.YAML) == 0 {
 				failed = append(failed, fmt.Sprintf("The YAML is empty [envId=%s,serviceRef=%s]", o.EnvironmentRef, o.ServiceRef))
 			} else {
-				err := c.api.createServiceOverride(&model.CreateServiceOverrideRequest{
+				err := createServiceOverride(c.target, &model.CreateServiceOverrideRequest{
 					OrgIdentifier:     c.targetOrg,
 					ProjectIdentifier: c.targetProject,
 					EnvironmentRef:    o.EnvironmentRef,
@@ -71,12 +73,12 @@ func (c ServiceOverrideContext) Move() error {
 	return nil
 }
 
-func (api *ApiRequest) listServiceOverrides(org, project, envId string) ([]*model.ServiceOverride, error) {
+func listServiceOverrides(s *SourceRequest, org, project, envId string) ([]*model.ServiceOverride, error) {
 
-	resp, err := api.Client.R().
-		SetHeader("x-api-key", api.Token).
+	resp, err := s.Client.R().
+		SetHeader("x-api-key", s.Token).
 		SetQueryParams(map[string]string{
-			"accountIdentifier":     api.Account,
+			"accountIdentifier":     s.Account,
 			"orgIdentifier":         org,
 			"projectIdentifier":     project,
 			"environmentIdentifier": envId,
@@ -99,14 +101,14 @@ func (api *ApiRequest) listServiceOverrides(org, project, envId string) ([]*mode
 	return result.Data.Content, nil
 }
 
-func (api *ApiRequest) createServiceOverride(override *model.CreateServiceOverrideRequest) error {
+func createServiceOverride(t *TargetRequest, override *model.CreateServiceOverrideRequest) error {
 
-	resp, err := api.Client.R().
-		SetHeader("x-api-key", api.Token).
+	resp, err := t.Client.R().
+		SetHeader("x-api-key", t.Token).
 		SetHeader("Content-Type", "application/json").
 		SetBody(override).
 		SetQueryParams(map[string]string{
-			"accountIdentifier": api.Account,
+			"accountIdentifier": t.Account,
 		}).
 		Post(BaseURL + "/ng/api/environmentsV2/serviceOverrides")
 	if err != nil {

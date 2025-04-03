@@ -13,16 +13,18 @@ const GET_TEMPLATE_ENDPOINT = "/template/api/templates/{templateIdentifier}"
 const CREATE_TEMPLATE_ENDPOINT = "/template/api/templates"
 
 type TemplateContext struct {
-	api           *ApiRequest
+	source        *SourceRequest
+	target        *TargetRequest
 	sourceOrg     string
 	sourceProject string
 	targetOrg     string
 	targetProject string
 }
 
-func NewTemplateOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) TemplateContext {
+func NewTemplateOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) TemplateContext {
 	return TemplateContext{
-		api:           api,
+		source:        sourceApi,
+		target:        targetApi,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
 		targetOrg:     targetOrg,
@@ -32,7 +34,7 @@ func NewTemplateOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, 
 
 func (c TemplateContext) Move() error {
 
-	templates, err := c.listTemplates(c.sourceOrg, c.sourceProject)
+	templates, err := listTemplates(c.source, c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return err
 	}
@@ -57,13 +59,12 @@ func (c TemplateContext) Move() error {
 	return nil
 }
 
-func (c TemplateContext) listTemplates(org, project string) (model.TemplateListResult, error) {
+func listTemplates(s *SourceRequest, org, project string) (model.TemplateListResult, error) {
 
-	api := c.api
-	resp, err := api.Client.R().
-		SetHeader("x-api-key", api.Token).
+	resp, err := s.Client.R().
+		SetHeader("x-api-key", s.Token).
 		SetHeader("Content-Type", "application/json").
-		SetHeader("Harness-Account", api.Account).
+		SetHeader("Harness-Account", s.Account).
 		SetPathParam("org", org).
 		SetPathParam("project", project).
 		SetQueryParams(map[string]string{
@@ -88,7 +89,7 @@ func (c TemplateContext) listTemplates(org, project string) (model.TemplateListR
 
 func (c TemplateContext) getTemplate(org, project, templateIdentifier, versionLabel string) (*model.TemplateGetData, error) {
 
-	api := c.api
+	api := c.source
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").
@@ -119,7 +120,7 @@ func (c TemplateContext) getTemplate(org, project, templateIdentifier, versionLa
 
 func (c TemplateContext) createTemplate(org, project, yaml string) error {
 
-	api := c.api
+	api := c.target
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").

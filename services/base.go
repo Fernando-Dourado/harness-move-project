@@ -12,8 +12,14 @@ import (
 
 const BaseURL = "https://app.harness.io"
 
-type ApiRequest struct {
-	Client  *resty.Client
+type SourceRequest struct {
+	Client *resty.Client
+	Token   string
+	Account string
+}
+
+type TargetRequest struct {
+	Client *resty.Client
 	Token   string
 	Account string
 }

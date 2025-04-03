@@ -12,16 +12,18 @@ import (
 var bar *progressbar.ProgressBar
 
 type FileStoreContext struct {
-	api           *ApiRequest
+	source        *SourceRequest
+	target        *TargetRequest
 	sourceOrg     string
 	sourceProject string
 	targetOrg     string
 	targetProject string
 }
 
-func NewFileStoreOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) FileStoreContext {
+func NewFileStoreOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) FileStoreContext {
 	return FileStoreContext{
-		api:           api,
+		source:        sourceApi,
+		target:        targetApi,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
 		targetOrg:     targetOrg,
@@ -108,11 +110,11 @@ func (c FileStoreContext) createNode(n *model.FileStoreNode) error {
 
 func (c FileStoreContext) downloadFile(n *model.FileStoreNode) ([]byte, error) {
 
-	resp, err := c.api.Client.R().
-		SetHeader("x-api-key", c.api.Token).
+	resp, err := c.source.Client.R().
+		SetHeader("x-api-key", c.source.Token).
 		SetPathParam("identifier", n.Identifier).
 		SetQueryParams(map[string]string{
-			"accountIdentifier": c.api.Account,
+			"accountIdentifier": c.source.Account,
 			"orgIdentifier":     c.sourceOrg,
 			"projectIdentifier": c.sourceProject,
 		}).
@@ -136,8 +138,8 @@ func (c FileStoreContext) createFile(n *model.FileStoreNode, b []byte) error {
 
 	reader := bytes.NewReader(b)
 
-	resp, err := c.api.Client.R().
-		SetHeader("x-api-key", c.api.Token).
+	resp, err := c.target.Client.R().
+		SetHeader("x-api-key", c.target.Token).
 		SetHeader("Content-Type", "multipart/form-data").
 		SetMultipartField("content", "blob", "plain/text", reader).
 		SetMultipartFormData(map[string]string{
@@ -151,7 +153,7 @@ func (c FileStoreContext) createFile(n *model.FileStoreNode, b []byte) error {
 			"mimeType":         *n.MimeType,
 		}).
 		SetQueryParams(map[string]string{
-			"accountIdentifier": c.api.Account,
+			"accountIdentifier": c.target.Account,
 			"orgIdentifier":     c.targetOrg,
 			"projectIdentifier": c.targetProject,
 		}).
@@ -173,8 +175,8 @@ func (c FileStoreContext) createFolder(n *model.FileStoreNode) error {
 		return fmt.Errorf("node %s is not a folder", n.Name)
 	}
 
-	resp, err := c.api.Client.R().
-		SetHeader("x-api-key", c.api.Token).
+	resp, err := c.target.Client.R().
+		SetHeader("x-api-key", c.target.Token).
 		SetHeader("Content-Type", "multipart/form-data").
 		SetMultipartFormData(map[string]string{
 			"identifier":       n.Identifier,
@@ -185,7 +187,7 @@ func (c FileStoreContext) createFolder(n *model.FileStoreNode) error {
 			"path":             n.Path,
 		}).
 		SetQueryParams(map[string]string{
-			"accountIdentifier": c.api.Account,
+			"accountIdentifier": c.target.Account,
 			"orgIdentifier":     c.targetOrg,
 			"projectIdentifier": c.targetProject,
 		}).
@@ -209,12 +211,12 @@ func (c FileStoreContext) listNodes(identifier, name string, parentIdentifier *s
 		Type:             "FOLDER",
 	}
 
-	resp, err := c.api.Client.R().
-		SetHeader("x-api-key", c.api.Token).
+	resp, err := c.source.Client.R().
+		SetHeader("x-api-key", c.source.Token).
 		SetHeader("Content-Type", "application/json").
 		SetBody(req).
 		SetQueryParams(map[string]string{
-			"accountIdentifier": c.api.Account,
+			"accountIdentifier": c.source.Account,
 			"orgIdentifier":     c.sourceOrg,
 			"projectIdentifier": c.sourceProject,
 		}).

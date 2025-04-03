@@ -10,16 +10,18 @@ import (
 )
 
 type EnvironmentContext struct {
-	api           *ApiRequest
+	source        *SourceRequest
+	target        *TargetRequest
 	sourceOrg     string
 	sourceProject string
 	targetOrg     string
 	targetProject string
 }
 
-func NewEnvironmentOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) EnvironmentContext {
+func NewEnvironmentOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) EnvironmentContext {
 	return EnvironmentContext{
-		api:           api,
+		source:        sourceApi,
+		target:        targetApi,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
 		targetOrg:     targetOrg,
@@ -29,7 +31,7 @@ func NewEnvironmentOperation(api *ApiRequest, sourceOrg, sourceProject, targetOr
 
 func (c EnvironmentContext) Move() error {
 
-	envs, err := c.api.listEnvironments(c.sourceOrg, c.sourceProject)
+	envs, err := c.source.listEnvironments(c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return nil
 	}
@@ -51,7 +53,7 @@ func (c EnvironmentContext) Move() error {
 			Type:              e.Type,
 			Yaml:              newYaml,
 		}
-		if err := c.api.createEnvironment(req); err != nil {
+		if err := createEnvironment(c.target, req); err != nil {
 			failed = append(failed, fmt.Sprintln(e.Name, "-", err.Error()))
 		}
 		bar.Add(1)
@@ -62,13 +64,13 @@ func (c EnvironmentContext) Move() error {
 	return nil
 }
 
-func (api *ApiRequest) listEnvironments(org, project string) ([]*model.ListEnvironmentContent, error) {
+func (s *SourceRequest) listEnvironments(org, project string) ([]*model.ListEnvironmentContent, error) {
 
-	resp, err := api.Client.R().
-		SetHeader("x-api-key", api.Token).
+	resp, err := s.Client.R().
+		SetHeader("x-api-key", s.Token).
 		SetHeader("Content-Type", "application/json").
 		SetQueryParams(map[string]string{
-			"accountIdentifier": api.Account,
+			"accountIdentifier": s.Account,
 			"orgIdentifier":     org,
 			"projectIdentifier": project,
 			"size":              "1000",
@@ -90,14 +92,14 @@ func (api *ApiRequest) listEnvironments(org, project string) ([]*model.ListEnvir
 	return result.Data.Content, nil
 }
 
-func (api *ApiRequest) createEnvironment(env *model.CreateEnvironmentRequest) error {
+func createEnvironment(t *TargetRequest, env *model.CreateEnvironmentRequest) error {
 
-	resp, err := api.Client.R().
-		SetHeader("x-api-key", api.Token).
+	resp, err := t.Client.R().
+		SetHeader("x-api-key", t.Token).
 		SetHeader("Content-Type", "application/json").
 		SetBody(env).
 		SetQueryParams(map[string]string{
-			"accountIdentifier": api.Account,
+			"accountIdentifier": t.Account,
 		}).
 		Post(BaseURL + "/ng/api/environmentsV2")
 	if err != nil {

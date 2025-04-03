@@ -9,16 +9,18 @@ import (
 )
 
 type VariableContext struct {
-	api           *ApiRequest
+	source        *SourceRequest
+	target        *TargetRequest
 	sourceOrg     string
 	sourceProject string
 	targetOrg     string
 	targetProject string
 }
 
-func NewVariableOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, targetProject string) VariableContext {
+func NewVariableOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) VariableContext {
 	return VariableContext{
-		api:           api,
+		source:        sourceApi,
+		target:        targetApi,
 		sourceOrg:     sourceOrg,
 		sourceProject: sourceProject,
 		targetOrg:     targetOrg,
@@ -28,7 +30,7 @@ func NewVariableOperation(api *ApiRequest, sourceOrg, sourceProject, targetOrg, 
 
 func (c VariableContext) Move() error {
 
-	variables, err := c.api.listVariables(c.sourceOrg, c.sourceProject)
+	variables, err := c.listVariables(c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return err
 	}
@@ -40,7 +42,7 @@ func (c VariableContext) Move() error {
 		v.OrgIdentifier = c.targetOrg
 		v.ProjectIdentifier = c.targetProject
 
-		err = c.api.createVariable(&model.CreateVariableRequest{
+		err = c.createVariable(&model.CreateVariableRequest{
 			Variable: v,
 		})
 		if err != nil {
@@ -54,8 +56,9 @@ func (c VariableContext) Move() error {
 	return nil
 }
 
-func (api *ApiRequest) listVariables(org, project string) ([]*model.Variable, error) {
+func (c VariableContext) listVariables(org, project string) ([]*model.Variable, error) {
 
+	api := c.source
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").
@@ -87,8 +90,9 @@ func (api *ApiRequest) listVariables(org, project string) ([]*model.Variable, er
 	return variables, nil
 }
 
-func (api *ApiRequest) createVariable(variable *model.CreateVariableRequest) error {
+func (c VariableContext) createVariable(variable *model.CreateVariableRequest) error {
 
+	api := c.target
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").

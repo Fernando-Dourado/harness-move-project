@@ -9,50 +9,53 @@ import (
 )
 
 type (
+	// NOT SURE WHICH NAME TO CHOSE TO THAT TYPE
 	Config struct {
 		Token   string
 		Account string
-	}
-
-	// NOT SURE WHICH NAME TO CHOSE TO THAT TYPE
-	NoName struct {
 		Org     string
 		Project string
 	}
 
 	Move struct {
-		Config Config
-		Source NoName
-		Target NoName
+		Source Config
+		Target Config
 	}
 )
 
 func (o *Move) Exec() error {
 
-	api := services.ApiRequest{
-		Client:  resty.New(),
-		Token:   o.Config.Token,
-		Account: o.Config.Account,
+	client := resty.New()
+
+	sourceApi := services.SourceRequest{
+		Client:  client,
+		Token:   o.Source.Token,
+		Account: o.Source.Account,
+	}
+	targetApi := services.TargetRequest{
+		Client:  client,
+		Token:   o.Target.Token,
+		Account: o.Target.Account,
 	}
 
 	// SOURCE AND TARGET MUST EXIST
-	if err := api.ValidateProject(o.Source.Org, o.Source.Project); err != nil {
+	if err := sourceApi.ValidateSource(o.Source.Org, o.Source.Project); err != nil {
 		return err
 	}
-	if err := api.ValidateProject(o.Target.Org, o.Target.Project); err != nil {
+	if err := targetApi.ValidateTarget(o.Target.Org, o.Target.Project); err != nil {
 		return err
 	}
 
 	var operations []services.Operation
-	operations = append(operations, services.NewVariableOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
-	operations = append(operations, services.NewFileStoreOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
-	operations = append(operations, services.NewEnvironmentOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
-	operations = append(operations, services.NewInfrastructureOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
-	operations = append(operations, services.NewServiceOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
-	operations = append(operations, services.NewServiceOverrideOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
-	operations = append(operations, services.NewTemplateOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
-	operations = append(operations, services.NewPipelineOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
-	operations = append(operations, services.NewInputsetOperation(&api, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewVariableOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewFileStoreOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewEnvironmentOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewInfrastructureOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewServiceOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewServiceOverrideOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewTemplateOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewPipelineOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
+	operations = append(operations, services.NewInputsetOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
 
 	for _, op := range operations {
 		if err := op.Move(); err != nil {
