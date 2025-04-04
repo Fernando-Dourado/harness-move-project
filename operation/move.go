@@ -28,6 +28,14 @@ type (
 	}
 )
 
+func NewMove(s, t CopyConfig, c OperationConfig) *Move {
+	return &Move{
+		Source:  s,
+		Target:  t,
+		Config:  c,
+	}
+}
+
 func (o *Move) Exec() error {
 
 	client := resty.New()

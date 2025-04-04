@@ -69,25 +69,25 @@ func main() {
 }
 
 func run(c *cli.Context) {
-	mv := operation.Move{
-		Source: operation.CopyConfig{
+	mv := operation.NewMove(
+		operation.CopyConfig{
 			Org:     c.String("source-org"),
 			Project: c.String("source-project"),
 			Token:   c.String("api-token"),
 			Account: c.String("account"),
 		},
-		Target: operation.CopyConfig{
+		operation.CopyConfig{
 			Org:     c.String("target-org"),
 			Project: c.String("target-project"),
 			Token:   c.String("target-token"),
 			Account: c.String("target-account"),
 		},
-		Config: operation.OperationConfig{
+		operation.OperationConfig{
 			CreateProject: c.Bool("create-project"),
 		},
-	}
+	)
 
-	applyArgumentRules(&mv)
+	applyArgumentRules(mv)
 
 	if err := mv.Exec(); err != nil {
 		fmt.Println(color.RedString(fmt.Sprint("Failed:", err.Error())))
