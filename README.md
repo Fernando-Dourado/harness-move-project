@@ -32,7 +32,7 @@ Execute the operation running that command in your terminal
   --target-org <org_identifier> --target-project <project_identifier>
 ```
 
-If the source and target projects has the same identifier, you can suppress the `--target-project` argument. Providing `--create-project` argument you can create the target project in case it does not exist in the target account and org.
+If the source and target projects has the same identifier, you can suppress the `--target-project` argument. Providing `--create-project true` you can create the target project in case it does not exist in the target account and org.
 
 When the tool try to create and entity on target project that the same identifier already exist, it just ignore the error and keep the execution. Using that strategy you can run it multiple times without side effects.
 
