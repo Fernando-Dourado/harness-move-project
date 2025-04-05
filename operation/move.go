@@ -30,9 +30,9 @@ type (
 
 func NewMove(s, t CopyConfig, c OperationConfig) *Move {
 	return &Move{
-		Source:  s,
-		Target:  t,
-		Config:  c,
+		Source: s,
+		Target: t,
+		Config: c,
 	}
 }
 
@@ -91,19 +91,23 @@ func (o *Move) Exec() error {
 
 func (o *Move) createProjectWhenRequired(sourceApi *services.SourceRequest, targetApi *services.TargetRequest, err error) error {
 
-	if o.Config.CreateProject && errors.Is(err, services.ErrEntityNotFound) {
-		fmt.Println("Creating project in target...")
+	if errors.Is(err, services.ErrEntityNotFound) {
+		if o.Config.CreateProject {
+			fmt.Println("Creating project in target...")
 
-		err = services.NewProjectOperation(sourceApi, targetApi, &services.SourceTarget{
-			SourceOrg:     o.Source.Org,
-			SourceProject: o.Source.Project,
-			TargetOrg:     o.Target.Org,
-			TargetProject: o.Target.Project,
-		}).Move()
+			err = services.NewProjectOperation(sourceApi, targetApi, &services.SourceTarget{
+				SourceOrg:     o.Source.Org,
+				SourceProject: o.Source.Project,
+				TargetOrg:     o.Target.Org,
+				TargetProject: o.Target.Project,
+			}).Move()
 
-		if err == nil {
-			fmt.Println(color.GreenString("Project %s created in target org %s", o.Target.Project, o.Target.Org))
-			return nil
+			if err == nil {
+				fmt.Println(color.GreenString("Project %s created in target org %s", o.Target.Project, o.Target.Org))
+				return nil
+			}
+		} else {
+			err = fmt.Errorf("project %s not found in target org %s; create project not set", o.Target.Project, o.Target.Org)
 		}
 	}
 	return err
