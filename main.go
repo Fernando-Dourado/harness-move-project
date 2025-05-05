@@ -90,7 +90,7 @@ func run(c *cli.Context) {
 	applyArgumentRules(mv)
 
 	if err := mv.Exec(); err != nil {
-		fmt.Println(color.RedString(fmt.Sprint("Failed:", err.Error())))
+		fmt.Println(color.RedString(fmt.Sprint("Failed: ", err.Error())))
 		os.Exit(1)
 	}
 }

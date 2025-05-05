@@ -14,11 +14,19 @@ const (
 )
 
 func (s *SourceRequest) ValidateSource(org, project string) error {
-	return validateOrgProject(s.Client, s.Token, s.Account, org, project)
+	err := validateOrgProject(s.Client, s.Token, s.Account, org, project)
+	if err != nil {
+		return fmt.Errorf("source validation %s/%s: %w", org, project, err)
+	}
+	return nil
 }
 
 func (t *TargetRequest) ValidateTarget(org, project string) error {
-	return validateOrgProject(t.Client, t.Token, t.Account, org, project)
+	err := validateOrgProject(t.Client, t.Token, t.Account, org, project)
+	if err != nil {
+		return fmt.Errorf("target validation %s/%s: %w", org, project, err)
+	}
+	return nil
 }
 
 func validateOrgProject(c *resty.Client, token, account, org, project string) error {
