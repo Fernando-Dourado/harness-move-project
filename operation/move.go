@@ -70,6 +70,8 @@ func (o *Move) Exec() error {
 
 	var operations []services.Operation
 	operations = append(operations, services.NewVariableOperation(&sourceApi, &targetApi, st))
+	operations = append(operations, services.NewSecretOperation(&sourceApi, &targetApi, st))
+	operations = append(operations, services.NewConnectorOperation(&sourceApi, &targetApi, st))
 	operations = append(operations, services.NewFileStoreOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
 	operations = append(operations, services.NewEnvironmentOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))
 	operations = append(operations, services.NewInfrastructureOperation(&sourceApi, &targetApi, o.Source.Org, o.Source.Project, o.Target.Org, o.Target.Project))

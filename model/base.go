@@ -28,3 +28,7 @@ type EntityValidityDetails struct {
 	Valid       bool    `json:"valid"`
 	InvalidYAML *string `json:"invalidYaml,omitempty"`
 }
+
+type ListRequestBody struct {
+	FilterType string `json:"filterType"`
+}

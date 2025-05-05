@@ -15,16 +15,16 @@ Download the latest version from [releases page](https://github.com/Fernando-Dou
 
 ## Requirements
 
-- The tool does not create the org or project target.
+- The tool does not create the org, can create the project when flag `create-project` is provided.
 - As safety operation the tool do not delete the entities from the source project.
 - The `api-key` need to have access to read from the source project and write to the target project.
 - You can run it multiple times, when the same entity already exists in the target project we ignore it and do not report it as an error.
 
 ## Usage
 
-Execute the operation running that command in your terminal
+Running that command in your terminal you do the most basic operation.
 
-```sh
+```bash
 ./harness-move-project \
   --api-token <SAT_OR_PAT> \
   --account <account_identifier> \
@@ -49,12 +49,20 @@ It is also possible to perform the copy between different accounts. To do this, 
 - Pipelines
 - Input Sets
 - File Store
+- Connectors
+
+## Partial Supported Entities
+
+- Secrets (Text, File, and SSH Credentials)
+
+> **Note:** During the secret copy process, the secret is created in the destination project with a **dummy value**.  
+> The actual value is **not** copied. This rule applies to both **secret text** and **secret file** types.  
+> You must manually update the secret with the correct value in the destination project after the copy is completed.
 
 ## Not Supported Entities
 
-- Secrets
+- Secrets (WinRM Credentials)
 - Triggers
-- Connectors
 - Service Overrides V2
 
 ## Limitation
@@ -91,11 +99,11 @@ GLOBAL OPTIONS:
    --source-project value  The project identifier in the source account.
    --target-org value      The org identifier in the target account.
    --target-project value  The project identifier in the target account.
-   --target-token value    API authentication token for accessing the target system. Not required if the target
-                           account is the same as the source account.
-   --target-account value  The account identifier associated with the target system. Not required if the target
-                           account is the same as the source account.
-   --create-project value  Creates the project in the target account and org if it does not exist. (boolean)
+   --target-token value    API authentication token for accessing the target system.
+                           Not needed if target and source accounts are the same.
+   --target-account value  The account identifier associated with the target system.
+                           Not needed if target and source accounts are the same.
+   --create-project value  Creates the project in the target account/org if missing.
    --help, -h              show help
    --version, -v           print the version
 ```
