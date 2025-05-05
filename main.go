@@ -51,17 +51,17 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:     "target-token",
-			Usage:    "API authentication token for accessing the target system. Not required if the target account is the same as the source account.",
+			Usage:    "API authentication token for accessing the target system. Not needed if target and source accounts are the same.",
 			Required: false,
 		},
 		cli.StringFlag{
 			Name:     "target-account",
-			Usage:    "The account identifier associated with the target system. Not required if the target account is the same as the source account.",
+			Usage:    "The account identifier associated with the target system. Not needed if target and source accounts are the same.",
 			Required: false,
 		},
-		cli.StringFlag{
+		cli.BoolFlag{
 			Name:     "create-project",
-			Usage:    "Creates the project in the target account and org if it does not exist.",
+			Usage:    "Creates the project in the target account/org if missing.",
 			Required: false,
 		},
 	}
