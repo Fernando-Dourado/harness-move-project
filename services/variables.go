@@ -36,7 +36,7 @@ func (c VariableContext) Move() error {
 	}
 
 	bar := progressbar.Default(int64(len(variables)), "Variables")
-	var failed []string
+	var failed = []string{}
 
 	for _, v := range variables {
 		v.OrgIdentifier = c.targetOrg
@@ -68,7 +68,7 @@ func (c VariableContext) listVariables(org, project string) ([]*model.Variable, 
 			"projectIdentifier": project,
 			"size":              "1000",
 		}).
-		Get(BaseURL + "/ng/api/variables")
+		Get(api.Url + "/ng/api/variables")
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (c VariableContext) createVariable(variable *model.CreateVariableRequest) e
 		SetQueryParams(map[string]string{
 			"accountIdentifier": api.Account,
 		}).
-		Post(BaseURL + "/ng/api/variables")
+		Post(api.Url + "/ng/api/variables")
 	if err != nil {
 		return err
 	}

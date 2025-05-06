@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"strconv"
 
 	"github.com/Fernando-Dourado/harness-move-project/model"
 	"github.com/schollz/progressbar/v3"
@@ -43,12 +44,18 @@ func (c EnvironmentContext) Move() error {
 		e := env.Environment
 
 		newYaml := createYaml(sanitizeEnvYaml(e.Yaml), c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
+
+		var descriptionToUse string
+		if e.Description != nil {
+			descriptionToUse = *e.Description
+		}
+
 		req := &model.CreateEnvironmentRequest{
 			OrgIdentifier:     c.targetOrg,
 			ProjectIdentifier: c.targetProject,
 			Identifier:        e.Identifier,
 			Name:              e.Name,
-			Description:       e.Description,
+			Description:       &descriptionToUse,
 			Color:             e.Color,
 			Type:              e.Type,
 			Yaml:              newYaml,
@@ -113,5 +120,43 @@ func createEnvironment(t *TargetRequest, env *model.CreateEnvironmentRequest) er
 }
 
 func sanitizeEnvYaml(yaml string) string {
-	return strings.ReplaceAll(yaml, "\"", "")
+	sanitized := strings.ReplaceAll(yaml, "\"", "")
+	sanitized = strings.ReplaceAll(sanitized, "description: null", "")
+	sanitized = strings.ReplaceAll(sanitized, "description: ", "")
+	sanitized = strings.ReplaceAll(sanitized, "\n\n", "")
+
+	lines := strings.Split(sanitized, "\n")
+	inVariablesSection := false
+	
+	for i, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+		
+		if strings.HasPrefix(trimmedLine, "variables:") {
+			inVariablesSection = true
+		} else if trimmedLine != "" && !strings.HasPrefix(trimmedLine, " ") && !strings.HasPrefix(trimmedLine, "-") {
+			inVariablesSection = false
+		}
+		
+		if strings.Contains(line, "value:") {
+			parts := strings.SplitN(line, "value:", 2)
+			if len(parts) == 2 {
+				valueStr := strings.TrimSpace(parts[1])
+				if valueStr != "" && !strings.HasPrefix(valueStr, "'") && !strings.HasPrefix(valueStr, "\"") {
+					lines[i] = parts[0] + "value: '" + valueStr + "'"
+				}
+			}
+		} else if inVariablesSection && strings.Contains(line, ":") && !strings.Contains(line, "variables:") {
+			parts := strings.SplitN(line, ":", 2)
+			if len(parts) == 2 {
+				valueStr := strings.TrimSpace(parts[1])
+				if valueStr != "" && !strings.HasPrefix(valueStr, "'") && !strings.HasPrefix(valueStr, "\"") {
+					if _, err := strconv.Atoi(valueStr); err == nil || strings.Contains(valueStr, ".") {
+						lines[i] = parts[0] + ": '" + valueStr + "'"
+					}
+				}
+			}
+		}
+	}
+	
+	return strings.Join(lines, "\n")
 }
