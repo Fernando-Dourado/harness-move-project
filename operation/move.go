@@ -19,6 +19,7 @@ type (
 		Account string
 		Org     string
 		Project string
+		Url     string
 	}
 
 	Move struct {
@@ -44,11 +45,13 @@ func (o *Move) Exec() error {
 		Client:  client,
 		Token:   o.Source.Token,
 		Account: o.Source.Account,
+		Url:     o.Source.Url,
 	}
 	targetApi := services.TargetRequest{
 		Client:  client,
 		Token:   o.Target.Token,
 		Account: o.Target.Account,
+		Url:     o.Target.Url,
 	}
 
 	// SOURCE AND TARGET MUST EXIST

@@ -11,7 +11,8 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-const BaseURL = "https://app.harness.io"
+// BaseURL can be overridden through InitBaseURL
+var BaseURL = "https://app.harness.io"
 
 var (
 	ErrEntityNotFound = errors.New("entity not found")
@@ -21,12 +22,14 @@ type SourceRequest struct {
 	Client  *resty.Client
 	Token   string
 	Account string
+	Url     string
 }
 
 type TargetRequest struct {
 	Client  *resty.Client
 	Token   string
 	Account string
+	Url     string
 }
 
 type SourceTarget struct {
@@ -90,5 +93,16 @@ func reportFailed(failed []string, description string) {
 	if len(failed) > 0 {
 		fmt.Println(color.RedString(fmt.Sprintf("Failed %s %d", description, len(failed))))
 		fmt.Println(color.RedString(strings.Join(failed, "\n")))
+	}
+}
+
+// InitBaseURL allows updating the base URL from outside the package
+func InitBaseURL(sourceURL, targetURL string) {
+	// If both URLs are provided and they're the same, update the BaseURL
+	if sourceURL != "" && targetURL != "" && sourceURL == targetURL {
+		BaseURL = sourceURL
+	} else {
+		// We keep the default BaseURL when source and target URLs differ
+		// because individual requests will use their specific URLs
 	}
 }
