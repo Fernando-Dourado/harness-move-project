@@ -73,7 +73,7 @@ func (c ConnectorContext) listConnectors(org, project string) ([]*nextgen.Connec
 		SetBody(model.ListRequestBody{
 			FilterType: "Connector",
 		}).
-		Post(BaseURL + "/ng/api/connectors/listV2")
+		Post(api.Url + "/ng/api/connectors/listV2")
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (c ConnectorContext) createConnector(connector *model.CreateConnectorReques
 		SetQueryParams(map[string]string{
 			"accountIdentifier": api.Account,
 		}).
-		Post(BaseURL + "/ng/api/connectors")
+		Post(api.Url + "/ng/api/connectors")
 	if err != nil {
 		return err
 	}

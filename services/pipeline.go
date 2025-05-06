@@ -71,7 +71,7 @@ func (s *SourceRequest) listPipelines(org, project string) ([]*model.PipelineLis
 			"projectIdentifier": project,
 			"size":              "1000",
 		}).
-		Post(BaseURL + LIST_PIPELINES)
+		Post(s.Url + LIST_PIPELINES)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func (c PipelineContext) getPipeline(org, project, pipeIdentifier string) (*mode
 			"orgIdentifier":     org,
 			"projectIdentifier": project,
 		}).
-		Get(BaseURL + fmt.Sprintf(GET_PIPELINE, pipeIdentifier))
+		Get(api.Url + fmt.Sprintf(GET_PIPELINE, pipeIdentifier))
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,7 @@ func (c PipelineContext) createPipeline(org, project, yaml string) error {
 			"orgIdentifier":     org,
 			"projectIdentifier": project,
 		}).
-		Post(BaseURL + CREATE_PIPELINE)
+		Post(api.Url + CREATE_PIPELINE)
 	if err != nil {
 		return err
 	}

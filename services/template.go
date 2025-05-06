@@ -70,7 +70,7 @@ func listTemplates(s *SourceRequest, org, project string) (model.TemplateListRes
 		SetQueryParams(map[string]string{
 			"limit": "1000",
 		}).
-		Get(BaseURL + LIST_TEMPLATES_ENDPOINT)
+		Get(s.Url + LIST_TEMPLATES_ENDPOINT)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (c TemplateContext) getTemplate(org, project, templateIdentifier, versionLa
 			"projectIdentifier": project,
 			"versionLabel":      versionLabel,
 		}).
-		Get(BaseURL + GET_TEMPLATE_ENDPOINT)
+		Get(api.Url + GET_TEMPLATE_ENDPOINT)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +130,7 @@ func (c TemplateContext) createTemplate(org, project, yaml string) error {
 			"orgIdentifier":     org,
 			"projectIdentifier": project,
 		}).
-		Post(BaseURL + CREATE_TEMPLATE_ENDPOINT)
+		Post(api.Url + CREATE_TEMPLATE_ENDPOINT)
 	if err != nil {
 		return err
 	}

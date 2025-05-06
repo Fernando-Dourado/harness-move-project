@@ -84,7 +84,7 @@ func (sc SecretContext) listSecrets(org string, project string) ([]*nextgen.Secr
 			FilterType: "Secret",
 		},
 		).
-		Post(BaseURL + "/ng/api/v2/secrets/list/secrets")
+		Post(api.Url + "/ng/api/v2/secrets/list/secrets")
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +140,7 @@ func (sc SecretContext) createSecretText(secret *nextgen.Secret) error {
 			"projectIdentifier": sc.targetProject,
 			"privateSecret":     "false",
 		}).
-		Post(BaseURL + "/ng/api/v2/secrets")
+		Post(api.Url + "/ng/api/v2/secrets")
 	if err != nil {
 		return err
 	}
@@ -175,7 +175,7 @@ func (sc SecretContext) createSecretFile(secret *nextgen.Secret) error {
 			"projectIdentifier": sc.targetProject,
 			"privateSecret":     "false",
 		}).
-		Post(BaseURL + "/ng/api/v2/secrets/files")
+		Post(sc.target.Url + "/ng/api/v2/secrets/files")
 	if err != nil {
 		return err
 	}
@@ -202,7 +202,7 @@ func (sc SecretContext) createSecretSSHKey(secret *nextgen.Secret) error {
 			"projectIdentifier": sc.targetProject,
 			"privateSecret":     "false",
 		}).
-		Post(BaseURL + "/ng/api/v2/secrets")
+		Post(api.Url + "/ng/api/v2/secrets")
 	if err != nil {
 		return err
 	}

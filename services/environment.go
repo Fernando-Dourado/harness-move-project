@@ -75,7 +75,7 @@ func (s *SourceRequest) listEnvironments(org, project string) ([]*model.ListEnvi
 			"projectIdentifier": project,
 			"size":              "1000",
 		}).
-		Get(BaseURL + "/ng/api/environmentsV2")
+		Get(s.Url + "/ng/api/environmentsV2")
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func createEnvironment(t *TargetRequest, env *model.CreateEnvironmentRequest) er
 		SetQueryParams(map[string]string{
 			"accountIdentifier": t.Account,
 		}).
-		Post(BaseURL + "/ng/api/environmentsV2")
+		Post(t.Url + "/ng/api/environmentsV2")
 	if err != nil {
 		return err
 	}

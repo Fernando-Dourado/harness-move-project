@@ -73,7 +73,7 @@ func listServices(s *SourceRequest, org, project string) ([]*model.ServiceListCo
 			"projectIdentifier": project,
 			"size":              "1000",
 		}).
-		Get(BaseURL + LIST_SERVICES)
+		Get(s.Url + LIST_SERVICES)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func createService(t *TargetRequest, service *model.CreateServiceRequest) error 
 		SetQueryParams(map[string]string{
 			"accountIdentifier": t.Account,
 		}).
-		Post(BaseURL + CREATE_SERVICES)
+		Post(t.Url + CREATE_SERVICES)
 	if err != nil {
 		return err
 	}
