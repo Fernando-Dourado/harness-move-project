@@ -80,32 +80,20 @@ func main() {
 }
 
 func run(c *cli.Context) {
-	// Get vanity URLs if provided
-	sourceURL := c.String("vanity-url-source")
-	targetURL := c.String("vanity-url-target")
-	
-	// Use default BaseURL when URLs are not provided
-	if sourceURL == "" {
-		sourceURL = services.BaseURL
-	}
-	if targetURL == "" {
-		targetURL = services.BaseURL
-	}
-	
 	mv := operation.NewMove(
 		operation.CopyConfig{
 			Org:     c.String("source-org"),
 			Project: c.String("source-project"),
 			Token:   c.String("api-token"),
 			Account: c.String("account"),
-			Url:     sourceURL,
+			Url:     c.String("vanity-url-source"),
 		},
 		operation.CopyConfig{
 			Org:     c.String("target-org"),
 			Project: c.String("target-project"),
 			Token:   c.String("target-token"),
 			Account: c.String("target-account"),
-			Url:     targetURL,
+			Url:     c.String("vanity-url-target"),
 		},
 		operation.OperationConfig{
 			CreateProject: c.Bool("create-project"),
@@ -132,6 +120,7 @@ func applyArgumentRules(mv *operation.Move) {
 	if len(mv.Target.Account) == 0 {
 		mv.Target.Account = mv.Source.Account
 	}
+	// USE DEFAULT BASEURL WHEN URL'S ARE NOT PROVIDED
 	if len(mv.Target.Url) == 0 {
 		mv.Target.Url = services.BaseURL
 	}

@@ -12,7 +12,7 @@ import (
 )
 
 // BaseURL is the default Harness API URL used when no specific URL is provided
-var BaseURL = "https://app.harness.io"
+const BaseURL = "https://app.harness.io"
 
 var (
 	ErrEntityNotFound = errors.New("entity not found")
