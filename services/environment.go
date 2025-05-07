@@ -3,8 +3,9 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
+	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/Fernando-Dourado/harness-move-project/model"
 	"github.com/schollz/progressbar/v3"
@@ -122,21 +123,23 @@ func createEnvironment(t *TargetRequest, env *model.CreateEnvironmentRequest) er
 func sanitizeEnvYaml(yaml string) string {
 	sanitized := strings.ReplaceAll(yaml, "\"", "")
 	sanitized = strings.ReplaceAll(sanitized, "description: null", "")
-	sanitized = strings.ReplaceAll(sanitized, "description: ", "")
-	sanitized = strings.ReplaceAll(sanitized, "\n\n", "")
+	emptyDescPattern := regexp.MustCompile(`description:\s*(\n|$)`)
+	sanitized = emptyDescPattern.ReplaceAllString(sanitized, "$1")
+
+	sanitized = strings.ReplaceAll(sanitized, "\n\n", "\n")
 
 	lines := strings.Split(sanitized, "\n")
 	inVariablesSection := false
-	
+
 	for i, line := range lines {
 		trimmedLine := strings.TrimSpace(line)
-		
+
 		if strings.HasPrefix(trimmedLine, "variables:") {
 			inVariablesSection = true
 		} else if trimmedLine != "" && !strings.HasPrefix(trimmedLine, " ") && !strings.HasPrefix(trimmedLine, "-") {
 			inVariablesSection = false
 		}
-		
+
 		if strings.Contains(line, "value:") {
 			parts := strings.SplitN(line, "value:", 2)
 			if len(parts) == 2 {
@@ -157,6 +160,6 @@ func sanitizeEnvYaml(yaml string) string {
 			}
 		}
 	}
-	
+
 	return strings.Join(lines, "\n")
 }
