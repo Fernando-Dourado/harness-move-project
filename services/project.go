@@ -14,7 +14,7 @@ const (
 )
 
 func (s *SourceRequest) ValidateSource(org, project string) error {
-	err := validateOrgProject(s.Client, s.Token, s.Account, org, project)
+	err := validateOrgProject(s.Client, s.Url, s.Token, s.Account, org, project)
 	if err != nil {
 		return fmt.Errorf("source validation %s/%s: %w", org, project, err)
 	}
@@ -22,15 +22,15 @@ func (s *SourceRequest) ValidateSource(org, project string) error {
 }
 
 func (t *TargetRequest) ValidateTarget(org, project string) error {
-	err := validateOrgProject(t.Client, t.Token, t.Account, org, project)
+	err := validateOrgProject(t.Client, t.Url, t.Token, t.Account, org, project)
 	if err != nil {
 		return fmt.Errorf("target validation %s/%s: %w", org, project, err)
 	}
 	return nil
 }
 
-func validateOrgProject(c *resty.Client, token, account, org, project string) error {
-	result, err := getProject(c, token, account, org, project)
+func validateOrgProject(c *resty.Client, url, token, account, org, project string) error {
+	result, err := getProject(c, url, token, account, org, project)
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func validateOrgProject(c *resty.Client, token, account, org, project string) er
 	return nil
 }
 
-func getProject(c *resty.Client, token, account, org, project string) (*model.GetProjectResponse, error) {
+func getProject(c *resty.Client, url, token, account, org, project string) (*model.GetProjectResponse, error) {
 	resp, err := c.R().
 		SetHeader("x-api-key", token).
 		SetHeader("Content-Type", "application/json").
@@ -49,7 +49,7 @@ func getProject(c *resty.Client, token, account, org, project string) (*model.Ge
 			"accountIdentifier": account,
 			"orgIdentifier":     org,
 		}).
-		Get(BaseURL + GET_PROJECT)
+		Get(url + GET_PROJECT)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func NewProjectOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st 
 }
 
 func (c ProjectContext) Move() error {
-	response, err := getProject(c.source.Client, c.source.Token, c.source.Account, c.sourceOrg, c.sourceProject)
+	response, err := getProject(c.source.Client, c.source.Url, c.source.Token, c.source.Account, c.sourceOrg, c.sourceProject)
 	if err != nil {
 		return err
 	}
@@ -120,7 +120,7 @@ func (t *TargetRequest) createProject(project model.Project) error {
 		SetHeader("Harness-Account", t.Account).
 		SetPathParam("org", project.OrgIdentifier).
 		SetBody(request).
-		Post(BaseURL + CREATE_PROJECT)
+		Post(t.Url + CREATE_PROJECT)
 	if err != nil {
 		return err
 	}

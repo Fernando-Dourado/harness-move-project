@@ -38,6 +38,22 @@ When the tool try to create and entity on target project that the same identifie
 
 It is also possible to perform the copy between different accounts. To do this, you need to specify the `--target-account` and `--target-token` of the target account.
 
+### Custom Harness URLs
+
+If you're using a custom domain or vanity URL for your Harness instance, you can specify these URLs using the `--vanity-url-source` and `--vanity-url-target` parameters:
+
+```bash
+./harness-move-project \
+  --api-token <SAT_OR_PAT> \
+  --account <account_identifier> \
+  --source-org <org_identifier> --source-project <project_identifier> \
+  --target-org <org_identifier> --target-project <project_identifier> \
+  --vanity-url-source <https://your-custom-domain.harness.io> \
+  --vanity-url-target <https://your-custom-domain.harness.io>
+```
+
+By default, the tool uses `https://app.harness.io` as the base URL. The vanity URL parameters allow you to override this when connecting to custom Harness instances.
+
 ## Supported Entities
 
 - Variables
@@ -93,17 +109,18 @@ COMMANDS:
    help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --api-token value       API authentication token for accessing the source system.
-   --account value         The account identifier associated with the source system.
-   --source-org value      The organization identifier in the source account.
-   --source-project value  The project identifier in the source account.
-   --target-org value      The org identifier in the target account.
-   --target-project value  The project identifier in the target account.
-   --target-token value    API authentication token for accessing the target system.
-                           Not needed if target and source accounts are the same.
-   --target-account value  The account identifier associated with the target system.
-                           Not needed if target and source accounts are the same.
-   --create-project value  Creates the project in the target account/org if missing.
-   --help, -h              show help
-   --version, -v           print the version
-```
+   --api-token value         API authentication token for accessing the source system.
+   --account value           The account identifier associated with the source system.
+   --source-org value        The organization identifier in the source account.
+   --source-project value    The project identifier in the source account.
+   --target-org value        The org identifier in the target account.
+   --target-project value    The project identifier in the target account.
+   --target-token value      API authentication token for accessing the target system.
+                             Not needed if target and source accounts are the same.
+   --target-account value    The account identifier associated with the target system.
+                             Not needed if target and source accounts are the same.
+   --vanity-url-source value Vanity URL for accessing the source account.
+   --vanity-url-target value Vanity URL for accessing the target account.
+   --create-project value    Creates the project in the target account/org if missing.
+   --help, -h                show help
+   --version, -v             print the version

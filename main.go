@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Fernando-Dourado/harness-move-project/operation"
+	"github.com/Fernando-Dourado/harness-move-project/services"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )
@@ -23,6 +24,16 @@ func main() {
 			Name:     "api-token",
 			Usage:    "API authentication token for accessing the source system.",
 			Required: true,
+		},
+		cli.StringFlag{
+			Name:     "vanity-url-source",
+			Usage:    "Vanity URL for accessing the source account.",
+			Required: false,
+		},
+		cli.StringFlag{
+			Name:     "vanity-url-target",
+			Usage:    "Vanity URL for accessing the target account.",
+			Required: false,
 		},
 		cli.StringFlag{
 			Name:     "account",
@@ -75,12 +86,14 @@ func run(c *cli.Context) {
 			Project: c.String("source-project"),
 			Token:   c.String("api-token"),
 			Account: c.String("account"),
+			Url:     c.String("vanity-url-source"),
 		},
 		operation.CopyConfig{
 			Org:     c.String("target-org"),
 			Project: c.String("target-project"),
 			Token:   c.String("target-token"),
 			Account: c.String("target-account"),
+			Url:     c.String("vanity-url-target"),
 		},
 		operation.OperationConfig{
 			CreateProject: c.Bool("create-project"),
@@ -106,5 +119,12 @@ func applyArgumentRules(mv *operation.Move) {
 	}
 	if len(mv.Target.Account) == 0 {
 		mv.Target.Account = mv.Source.Account
+	}
+	// USE DEFAULT BASEURL WHEN URL'S ARE NOT PROVIDED
+	if len(mv.Target.Url) == 0 {
+		mv.Target.Url = services.BaseURL
+	}
+	if len(mv.Source.Url) == 0 {
+		mv.Source.Url = services.BaseURL
 	}
 }

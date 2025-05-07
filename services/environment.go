@@ -3,6 +3,8 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/Fernando-Dourado/harness-move-project/model"
@@ -43,12 +45,18 @@ func (c EnvironmentContext) Move() error {
 		e := env.Environment
 
 		newYaml := createYaml(sanitizeEnvYaml(e.Yaml), c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
+
+		var descriptionToUse string
+		if e.Description != nil {
+			descriptionToUse = *e.Description
+		}
+
 		req := &model.CreateEnvironmentRequest{
 			OrgIdentifier:     c.targetOrg,
 			ProjectIdentifier: c.targetProject,
 			Identifier:        e.Identifier,
 			Name:              e.Name,
-			Description:       e.Description,
+			Description:       &descriptionToUse,
 			Color:             e.Color,
 			Type:              e.Type,
 			Yaml:              newYaml,
@@ -75,7 +83,7 @@ func (s *SourceRequest) listEnvironments(org, project string) ([]*model.ListEnvi
 			"projectIdentifier": project,
 			"size":              "1000",
 		}).
-		Get(BaseURL + "/ng/api/environmentsV2")
+		Get(s.Url + "/ng/api/environmentsV2")
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +109,7 @@ func createEnvironment(t *TargetRequest, env *model.CreateEnvironmentRequest) er
 		SetQueryParams(map[string]string{
 			"accountIdentifier": t.Account,
 		}).
-		Post(BaseURL + "/ng/api/environmentsV2")
+		Post(t.Url + "/ng/api/environmentsV2")
 	if err != nil {
 		return err
 	}
@@ -113,5 +121,45 @@ func createEnvironment(t *TargetRequest, env *model.CreateEnvironmentRequest) er
 }
 
 func sanitizeEnvYaml(yaml string) string {
-	return strings.ReplaceAll(yaml, "\"", "")
+	sanitized := strings.ReplaceAll(yaml, "\"", "")
+	sanitized = strings.ReplaceAll(sanitized, "description: null", "")
+	emptyDescPattern := regexp.MustCompile(`description:\s*(\n|$)`)
+	sanitized = emptyDescPattern.ReplaceAllString(sanitized, "$1")
+
+	sanitized = strings.ReplaceAll(sanitized, "\n\n", "\n")
+
+	lines := strings.Split(sanitized, "\n")
+	inVariablesSection := false
+
+	for i, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+
+		if strings.HasPrefix(trimmedLine, "variables:") {
+			inVariablesSection = true
+		} else if trimmedLine != "" && !strings.HasPrefix(trimmedLine, " ") && !strings.HasPrefix(trimmedLine, "-") {
+			inVariablesSection = false
+		}
+
+		if strings.Contains(line, "value:") {
+			parts := strings.SplitN(line, "value:", 2)
+			if len(parts) == 2 {
+				valueStr := strings.TrimSpace(parts[1])
+				if valueStr != "" && !strings.HasPrefix(valueStr, "'") && !strings.HasPrefix(valueStr, "\"") {
+					lines[i] = parts[0] + "value: '" + valueStr + "'"
+				}
+			}
+		} else if inVariablesSection && strings.Contains(line, ":") && !strings.Contains(line, "variables:") {
+			parts := strings.SplitN(line, ":", 2)
+			if len(parts) == 2 {
+				valueStr := strings.TrimSpace(parts[1])
+				if valueStr != "" && !strings.HasPrefix(valueStr, "'") && !strings.HasPrefix(valueStr, "\"") {
+					if _, err := strconv.Atoi(valueStr); err == nil || strings.Contains(valueStr, ".") {
+						lines[i] = parts[0] + ": '" + valueStr + "'"
+					}
+				}
+			}
+		}
+	}
+
+	return strings.Join(lines, "\n")
 }

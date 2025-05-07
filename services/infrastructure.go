@@ -88,7 +88,7 @@ func listInfraDef(s *SourceRequest, org, project, envId string) ([]*model.InfraD
 			"environmentIdentifier": envId,
 			"size":                  "1000",
 		}).
-		Get(BaseURL + "/ng/api/infrastructures")
+		Get(s.Url + "/ng/api/infrastructures")
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func createInfrastructure(t *TargetRequest, infra *model.CreateInfrastructureReq
 		SetQueryParams(map[string]string{
 			"accountIdentifier": t.Account,
 		}).
-		Post(BaseURL + "/ng/api/infrastructures")
+		Post(t.Url + "/ng/api/infrastructures")
 	if err != nil {
 		return err
 	}

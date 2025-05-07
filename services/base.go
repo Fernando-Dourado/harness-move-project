@@ -11,6 +11,7 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+// BaseURL is the default Harness API URL used when no specific URL is provided
 const BaseURL = "https://app.harness.io"
 
 var (
@@ -21,12 +22,14 @@ type SourceRequest struct {
 	Client  *resty.Client
 	Token   string
 	Account string
+	Url     string
 }
 
 type TargetRequest struct {
 	Client  *resty.Client
 	Token   string
 	Account string
+	Url     string
 }
 
 type SourceTarget struct {
