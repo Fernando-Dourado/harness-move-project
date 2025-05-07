@@ -80,10 +80,17 @@ func main() {
 }
 
 func run(c *cli.Context) {
-	// Initialize BaseURL with vanity URLs if provided
+	// Get vanity URLs if provided
 	sourceURL := c.String("vanity-url-source")
 	targetURL := c.String("vanity-url-target")
-	services.InitBaseURL(sourceURL, targetURL)
+	
+	// Use default BaseURL when URLs are not provided
+	if sourceURL == "" {
+		sourceURL = services.BaseURL
+	}
+	if targetURL == "" {
+		targetURL = services.BaseURL
+	}
 	
 	mv := operation.NewMove(
 		operation.CopyConfig{
@@ -91,14 +98,14 @@ func run(c *cli.Context) {
 			Project: c.String("source-project"),
 			Token:   c.String("api-token"),
 			Account: c.String("account"),
-			Url:     c.String("vanity-url-source"),
+			Url:     sourceURL,
 		},
 		operation.CopyConfig{
 			Org:     c.String("target-org"),
 			Project: c.String("target-project"),
 			Token:   c.String("target-token"),
 			Account: c.String("target-account"),
-			Url:     c.String("vanity-url-target"),
+			Url:     targetURL,
 		},
 		operation.OperationConfig{
 			CreateProject: c.Bool("create-project"),
