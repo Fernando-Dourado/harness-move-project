@@ -17,14 +17,14 @@ type InputsetContext struct {
 	targetProject string
 }
 
-func NewInputsetOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) InputsetContext {
+func NewInputsetOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) InputsetContext {
 	return InputsetContext{
 		source:        sourceApi,
 		target:        targetApi,
-		sourceOrg:     sourceOrg,
-		sourceProject: sourceProject,
-		targetOrg:     targetOrg,
-		targetProject: targetProject,
+		sourceOrg:     st.SourceOrg,
+		sourceProject: st.SourceProject,
+		targetOrg:     st.TargetOrg,
+		targetProject: st.TargetProject,
 	}
 }
 

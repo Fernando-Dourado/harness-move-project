@@ -20,14 +20,14 @@ type ServiceContext struct {
 	targetProject string
 }
 
-func NewServiceOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) ServiceContext {
+func NewServiceOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) ServiceContext {
 	return ServiceContext{
 		source:        sourceApi,
 		target:        targetApi,
-		sourceOrg:     sourceOrg,
-		sourceProject: sourceProject,
-		targetOrg:     targetOrg,
-		targetProject: targetProject,
+		sourceOrg:     st.SourceOrg,
+		sourceProject: st.SourceProject,
+		targetOrg:     st.TargetOrg,
+		targetProject: st.TargetProject,
 	}
 }
 

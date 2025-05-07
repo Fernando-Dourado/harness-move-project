@@ -21,14 +21,14 @@ type TemplateContext struct {
 	targetProject string
 }
 
-func NewTemplateOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) TemplateContext {
+func NewTemplateOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) TemplateContext {
 	return TemplateContext{
 		source:        sourceApi,
 		target:        targetApi,
-		sourceOrg:     sourceOrg,
-		sourceProject: sourceProject,
-		targetOrg:     targetOrg,
-		targetProject: targetProject,
+		sourceOrg:     st.SourceOrg,
+		sourceProject: st.SourceProject,
+		targetOrg:     st.TargetOrg,
+		targetProject: st.TargetProject,
 	}
 }
 

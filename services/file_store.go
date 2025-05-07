@@ -20,14 +20,14 @@ type FileStoreContext struct {
 	targetProject string
 }
 
-func NewFileStoreOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) FileStoreContext {
+func NewFileStoreOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) FileStoreContext {
 	return FileStoreContext{
 		source:        sourceApi,
 		target:        targetApi,
-		sourceOrg:     sourceOrg,
-		sourceProject: sourceProject,
-		targetOrg:     targetOrg,
-		targetProject: targetProject,
+		sourceOrg:     st.SourceOrg,
+		sourceProject: st.SourceProject,
+		targetOrg:     st.TargetOrg,
+		targetProject: st.TargetProject,
 	}
 }
 

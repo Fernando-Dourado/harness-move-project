@@ -20,14 +20,14 @@ type EnvironmentContext struct {
 	targetProject string
 }
 
-func NewEnvironmentOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) EnvironmentContext {
+func NewEnvironmentOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) EnvironmentContext {
 	return EnvironmentContext{
 		source:        sourceApi,
 		target:        targetApi,
-		sourceOrg:     sourceOrg,
-		sourceProject: sourceProject,
-		targetOrg:     targetOrg,
-		targetProject: targetProject,
+		sourceOrg:     st.SourceOrg,
+		sourceProject: st.SourceProject,
+		targetOrg:     st.TargetOrg,
+		targetProject: st.TargetProject,
 	}
 }
 

@@ -17,14 +17,14 @@ type ServiceOverrideContext struct {
 	targetProject string
 }
 
-func NewServiceOverrideOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) ServiceOverrideContext {
+func NewServiceOverrideOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) ServiceOverrideContext {
 	return ServiceOverrideContext{
 		source:        sourceApi,
 		target:        targetApi,
-		sourceOrg:     sourceOrg,
-		sourceProject: sourceProject,
-		targetOrg:     targetOrg,
-		targetProject: targetProject,
+		sourceOrg:     st.SourceOrg,
+		sourceProject: st.SourceProject,
+		targetOrg:     st.TargetOrg,
+		targetProject: st.TargetProject,
 	}
 }
 

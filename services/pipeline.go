@@ -21,14 +21,14 @@ type PipelineContext struct {
 	targetProject string
 }
 
-func NewPipelineOperation(sourceApi *SourceRequest, targetApi *TargetRequest, sourceOrg, sourceProject, targetOrg, targetProject string) PipelineContext {
+func NewPipelineOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) PipelineContext {
 	return PipelineContext{
 		source:        sourceApi,
 		target:        targetApi,
-		sourceOrg:     sourceOrg,
-		sourceProject: sourceProject,
-		targetOrg:     targetOrg,
-		targetProject: targetProject,
+		sourceOrg:     st.SourceOrg,
+		sourceProject: st.SourceProject,
+		targetOrg:     st.TargetOrg,
+		targetProject: st.TargetProject,
 	}
 }
 
