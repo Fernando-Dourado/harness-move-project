@@ -80,6 +80,7 @@ func (o *Move) Exec() error {
 	operations = append(operations, services.NewInfrastructureOperation(&sourceApi, &targetApi, st))
 	operations = append(operations, services.NewServiceOperation(&sourceApi, &targetApi, st))
 	operations = append(operations, services.NewServiceOverrideOperation(&sourceApi, &targetApi, st))
+	operations = append(operations, services.NewOverrideV2Operation(&sourceApi, &targetApi, st))
 	operations = append(operations, services.NewTemplateOperation(&sourceApi, &targetApi, st))
 	operations = append(operations, services.NewPipelineOperation(&sourceApi, &targetApi, st))
 	operations = append(operations, services.NewInputsetOperation(&sourceApi, &targetApi, st))

@@ -35,7 +35,7 @@ func (c ServiceOverrideContext) Move() error {
 		return err
 	}
 
-	bar := progressbar.Default(int64(len(envs)), "Service Override")
+	bar := progressbar.Default(int64(len(envs)), "Overrides V1")
 	var failed []string
 
 	for _, env := range envs {
@@ -69,7 +69,7 @@ func (c ServiceOverrideContext) Move() error {
 	}
 	bar.Finish()
 
-	reportFailed(failed, "overrides:")
+	reportFailed(failed, "overrides v1:")
 	return nil
 }
 
