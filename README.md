@@ -61,6 +61,7 @@ By default, the tool uses `https://app.harness.io` as the base URL. The vanity U
 - Infrastructure Definition
 - Services
 - Service Overrides V1
+- Service Overrides V2
 - Templates
 - Pipelines
 - Input Sets
@@ -79,7 +80,6 @@ By default, the tool uses `https://app.harness.io` as the base URL. The vanity U
 
 - Secrets (WinRM Credentials)
 - Triggers
-- Service Overrides V2
 
 ## Limitation
 
