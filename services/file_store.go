@@ -113,11 +113,7 @@ func (c FileStoreContext) downloadFile(n *model.FileStoreNode) ([]byte, error) {
 	resp, err := c.source.Client.R().
 		SetHeader("x-api-key", c.source.Token).
 		SetPathParam("identifier", n.Identifier).
-		SetQueryParams(map[string]string{
-			"accountIdentifier": c.source.Account,
-			"orgIdentifier":     c.sourceOrg,
-			"projectIdentifier": c.sourceProject,
-		}).
+		SetQueryParams(createQueryParams(c.source.Account, c.sourceOrg, c.sourceProject)).
 		Get(c.source.Url + "/ng/api/file-store/files/{identifier}/download")
 	if err != nil {
 		return nil, err
@@ -152,11 +148,7 @@ func (c FileStoreContext) createFile(n *model.FileStoreNode, b []byte) error {
 			"fileUsage":        n.FileUsage,
 			"mimeType":         *n.MimeType,
 		}).
-		SetQueryParams(map[string]string{
-			"accountIdentifier": c.target.Account,
-			"orgIdentifier":     c.targetOrg,
-			"projectIdentifier": c.targetProject,
-		}).
+		SetQueryParams(createQueryParams(c.target.Account, c.targetOrg, c.targetProject)).
 		Post(c.target.Url + "/ng/api/file-store")
 	if err != nil {
 		return err
@@ -186,11 +178,7 @@ func (c FileStoreContext) createFolder(n *model.FileStoreNode) error {
 			"description":      n.Description,
 			"path":             n.Path,
 		}).
-		SetQueryParams(map[string]string{
-			"accountIdentifier": c.target.Account,
-			"orgIdentifier":     c.targetOrg,
-			"projectIdentifier": c.targetProject,
-		}).
+		SetQueryParams(createQueryParams(c.target.Account, c.targetOrg, c.targetProject)).
 		Post(c.target.Url + "/ng/api/file-store")
 	if err != nil {
 		return err
@@ -215,11 +203,7 @@ func (c FileStoreContext) listNodes(identifier, name string, parentIdentifier *s
 		SetHeader("x-api-key", c.source.Token).
 		SetHeader("Content-Type", "application/json").
 		SetBody(req).
-		SetQueryParams(map[string]string{
-			"accountIdentifier": c.source.Account,
-			"orgIdentifier":     c.sourceOrg,
-			"projectIdentifier": c.sourceProject,
-		}).
+		SetQueryParams(createQueryParams(c.source.Account, c.sourceOrg, c.sourceProject)).
 		Post(c.source.Url + "/ng/api/file-store/folder")
 	if err != nil {
 		return nil, err
@@ -235,4 +219,15 @@ func (c FileStoreContext) listNodes(identifier, name string, parentIdentifier *s
 	}
 
 	return result.Data.Children, nil
+}
+
+func createQueryParams(account, org, project string) map[string]string {
+	params := map[string]string{
+		"accountIdentifier": account,
+		"orgIdentifier":     org,
+	}
+	if len(project) > 0 {
+		params["projectIdentifier"] = project
+	}
+	return params
 }
