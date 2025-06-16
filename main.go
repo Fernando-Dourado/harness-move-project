@@ -48,7 +48,7 @@ func main() {
 		cli.StringFlag{
 			Name:     "source-project",
 			Usage:    "The project identifier in the source account.",
-			Required: true,
+			Required: false,
 		},
 		cli.StringFlag{
 			Name:     "target-org",
