@@ -64,15 +64,13 @@ func (c ServiceContext) Move() error {
 
 func listServices(s *SourceRequest, org, project string) ([]*model.ServiceListContent, error) {
 
+	params := createQueryParams(s.Account, org, project)
+	params["size"] = "1000"
+
 	resp, err := s.Client.R().
 		SetHeader("x-api-key", s.Token).
 		SetHeader("Content-Type", "application/json").
-		SetQueryParams(map[string]string{
-			"accountIdentifier": s.Account,
-			"orgIdentifier":     org,
-			"projectIdentifier": project,
-			"size":              "1000",
-		}).
+		SetQueryParams(params).
 		Get(s.Url + LIST_SERVICES)
 	if err != nil {
 		return nil, err

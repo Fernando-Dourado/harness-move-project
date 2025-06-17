@@ -71,18 +71,17 @@ func (c OverrideV2Context) Move() error {
 }
 
 func (c OverrideV2Context) listOverrides(org, project string, overrideType model.OverridesV2Type) ([]string, error) {
+
+	params := createQueryParams(c.source.Account, org, project)
+	params["size"] = "1000"
+	params["page"] = "0"
+	params["type"] = string(overrideType)
+
 	api := c.source
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").
-		SetQueryParams(map[string]string{
-			"accountIdentifier": api.Account,
-			"orgIdentifier":     org,
-			"projectIdentifier": project,
-			"size":              "1000",
-			"page":              "0",
-			"type":              string(overrideType),
-		}).
+		SetQueryParams(params).
 		Post(api.Url + "/ng/api/serviceOverrides/v2/list")
 	if err != nil {
 		return nil, err
@@ -107,15 +106,13 @@ func (c OverrideV2Context) listOverrides(org, project string, overrideType model
 
 func (c OverrideV2Context) getOverride(identifier string) (*model.OverridesV2, error) {
 
+	params := createQueryParams(c.source.Account, c.sourceOrg, c.sourceProject)
+
 	api := c.source
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").
-		SetQueryParams(map[string]string{
-			"accountIdentifier": api.Account,
-			"orgIdentifier":     c.sourceOrg,
-			"projectIdentifier": c.sourceProject,
-		}).
+		SetQueryParams(params).
 		SetPathParams(map[string]string{
 			"identifier": identifier,
 		}).
@@ -137,7 +134,7 @@ func (c OverrideV2Context) getOverride(identifier string) (*model.OverridesV2, e
 }
 
 func (c OverrideV2Context) createOverride(override *model.OverridesV2) error {
-	
+
 	api := c.target
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).

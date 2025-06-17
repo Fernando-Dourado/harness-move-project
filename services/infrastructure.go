@@ -78,16 +78,14 @@ func (c InfrastructureContext) Move() error {
 
 func listInfraDef(s *SourceRequest, org, project, envId string) ([]*model.InfraDefListContent, error) {
 
+	params := createQueryParams(s.Account, org, project)
+	params["environmentIdentifier"] = envId
+	params["size"] = "1000"
+
 	resp, err := s.Client.R().
 		SetHeader("x-api-key", s.Token).
 		SetHeader("Content-Type", "application/json").
-		SetQueryParams(map[string]string{
-			"accountIdentifier":     s.Account,
-			"orgIdentifier":         org,
-			"projectIdentifier":     project,
-			"environmentIdentifier": envId,
-			"size":                  "1000",
-		}).
+		SetQueryParams(params).
 		Get(s.Url + "/ng/api/infrastructures")
 	if err != nil {
 		return nil, err

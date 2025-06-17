@@ -61,16 +61,27 @@ func (c TemplateContext) Move() error {
 
 func listTemplates(s *SourceRequest, org, project string) (model.TemplateListResult, error) {
 
+	params := map[string]string{
+		"org": org,
+	}
+	if len(project) > 0 {
+		params["project"] = project
+	}
+
+	endpoint := LIST_TEMPLATES_ENDPOINT
+	if len(project) == 0 {
+		endpoint = "/v1/orgs/{org}/templates"
+	}
+
 	resp, err := s.Client.R().
 		SetHeader("x-api-key", s.Token).
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Harness-Account", s.Account).
-		SetPathParam("org", org).
-		SetPathParam("project", project).
+		SetPathParams(params).
 		SetQueryParams(map[string]string{
 			"limit": "1000",
 		}).
-		Get(s.Url + LIST_TEMPLATES_ENDPOINT)
+		Get(s.Url + endpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -89,18 +100,16 @@ func listTemplates(s *SourceRequest, org, project string) (model.TemplateListRes
 
 func (c TemplateContext) getTemplate(org, project, templateIdentifier, versionLabel string) (*model.TemplateGetData, error) {
 
+	params := createQueryParams(c.source.Account, org, project)
+	params["versionLabel"] = versionLabel
+
 	api := c.source
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Load-From-Cache", "false").
 		SetPathParam("templateIdentifier", templateIdentifier).
-		SetQueryParams(map[string]string{
-			"accountIdentifier": api.Account,
-			"orgIdentifier":     org,
-			"projectIdentifier": project,
-			"versionLabel":      versionLabel,
-		}).
+		SetQueryParams(params).
 		Get(api.Url + GET_TEMPLATE_ENDPOINT)
 	if err != nil {
 		return nil, err
@@ -120,16 +129,14 @@ func (c TemplateContext) getTemplate(org, project, templateIdentifier, versionLa
 
 func (c TemplateContext) createTemplate(org, project, yaml string) error {
 
+	params := createQueryParams(c.target.Account, org, project)
+
 	api := c.target
 	resp, err := api.Client.R().
 		SetHeader("x-api-key", api.Token).
 		SetHeader("Content-Type", "application/json").
 		SetBody(yaml).
-		SetQueryParams(map[string]string{
-			"accountIdentifier": api.Account,
-			"orgIdentifier":     org,
-			"projectIdentifier": project,
-		}).
+		SetQueryParams(params).
 		Post(api.Url + CREATE_TEMPLATE_ENDPOINT)
 	if err != nil {
 		return err

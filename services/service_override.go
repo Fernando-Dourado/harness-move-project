@@ -75,15 +75,12 @@ func (c ServiceOverrideContext) Move() error {
 
 func listServiceOverrides(s *SourceRequest, org, project, envId string) ([]*model.ServiceOverride, error) {
 
+	params := createQueryParams(s.Account, org, project)
+	params["size"] = "1000"
+
 	resp, err := s.Client.R().
 		SetHeader("x-api-key", s.Token).
-		SetQueryParams(map[string]string{
-			"accountIdentifier":     s.Account,
-			"orgIdentifier":         org,
-			"projectIdentifier":     project,
-			"environmentIdentifier": envId,
-			"size":                  "1000",
-		}).
+		SetQueryParams(params).
 		Get(s.Url + "/ng/api/environmentsV2/serviceOverrides")
 	if err != nil {
 		return nil, err
