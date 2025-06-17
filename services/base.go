@@ -61,7 +61,9 @@ func createYaml(yaml, sourceOrg, sourceProject, targetOrg, targetProject string)
 	if strings.Contains(yaml, "projectIdentifier: ") {
 		out = strings.ReplaceAll(out, "projectIdentifier: "+sourceProject, "projectIdentifier: "+targetProject)
 	} else {
-		out = fmt.Sprintln(yaml, " projectIdentifier:", targetProject)
+		if len(targetProject) > 0 {
+			out = fmt.Sprintln(yaml, " projectIdentifier:", targetProject)
+		}
 	}
 
 	return out
@@ -94,4 +96,15 @@ func reportFailed(failed []string, description string) {
 		fmt.Println(color.RedString(fmt.Sprintf("Failed %s %d", description, len(failed))))
 		fmt.Println(color.RedString(strings.Join(failed, "\n")))
 	}
+}
+
+func createQueryParams(account, org, project string) map[string]string {
+	params := map[string]string{
+		"accountIdentifier": account,
+		"orgIdentifier":     org,
+	}
+	if len(project) > 0 {
+		params["projectIdentifier"] = project
+	}
+	return params
 }

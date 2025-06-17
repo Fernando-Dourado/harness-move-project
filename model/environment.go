@@ -36,7 +36,7 @@ type Environment struct {
 
 type CreateEnvironmentRequest struct {
 	OrgIdentifier     string  `json:"orgIdentifier"`
-	ProjectIdentifier string  `json:"projectIdentifier"`
+	ProjectIdentifier string  `json:"projectIdentifier,omitempty"`
 	Identifier        string  `json:"identifier"`
 	Name              string  `json:"name"`
 	Description       *string `json:"description,omitempty"`

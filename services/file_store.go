@@ -220,14 +220,3 @@ func (c FileStoreContext) listNodes(identifier, name string, parentIdentifier *s
 
 	return result.Data.Children, nil
 }
-
-func createQueryParams(account, org, project string) map[string]string {
-	params := map[string]string{
-		"accountIdentifier": account,
-		"orgIdentifier":     org,
-	}
-	if len(project) > 0 {
-		params["projectIdentifier"] = project
-	}
-	return params
-}
