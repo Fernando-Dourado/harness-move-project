@@ -55,8 +55,10 @@ func (c ConnectorContext) Move() error {
 	for _, conn := range connectors {
 		conn.OrgIdentifier = c.targetOrg
 		conn.ProjectIdentifier = c.targetProject
-		// Process the connector struct recursively to replace account identifiers with org values
-		c.processStruct(reflect.ValueOf(conn).Elem(), "org")
+
+		strConn, _ := json.Marshal(conn)
+		newConn := strings.ReplaceAll(string(strConn), "account.", "org.")
+		json.Unmarshal([]byte(newConn), &conn)
 
 		err = c.createConnector(&model.CreateConnectorRequest{
 			Connector: conn,
@@ -165,7 +167,7 @@ func (c ConnectorContext) processStruct(v reflect.Value, orgValue string) {
 		fieldKind := fieldValue.Kind()
 
 		// Check if this is a string field with "account" in the name
-		if strings.Contains(strings.ToLower(field.Name), "account") &&
+		if strings.Contains(strings.ToLower(field.Name), "account.") &&
 			fieldKind == reflect.String &&
 			fieldValue.CanSet() {
 			// Replace the string value with org value
