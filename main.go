@@ -43,7 +43,7 @@ func main() {
 		cli.StringFlag{
 			Name:     "source-org",
 			Usage:    "The organization identifier in the source account.",
-			Required: true,
+			Required: false,
 		},
 		cli.StringFlag{
 			Name:     "source-project",
