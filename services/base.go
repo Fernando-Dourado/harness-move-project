@@ -101,7 +101,9 @@ func reportFailed(failed []string, description string) {
 func createQueryParams(account, org, project string) map[string]string {
 	params := map[string]string{
 		"accountIdentifier": account,
-		"orgIdentifier":     org,
+	}
+	if len(org) > 0 {
+		params["orgIdentifier"] = org
 	}
 	if len(project) > 0 {
 		params["projectIdentifier"] = project

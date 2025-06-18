@@ -71,6 +71,10 @@ func listTemplates(s *SourceRequest, org, project string) (model.TemplateListRes
 	endpoint := LIST_TEMPLATES_ENDPOINT
 	if len(project) == 0 {
 		endpoint = "/v1/orgs/{org}/templates"
+	} else if len(org) == 0 {
+		endpoint = "/v1/templates"
+	} else {
+		endpoint = LIST_TEMPLATES_ENDPOINT
 	}
 
 	resp, err := s.Client.R().

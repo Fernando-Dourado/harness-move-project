@@ -31,9 +31,20 @@ func NewConnectorOperation(sourceApi *SourceRequest, targetApi *TargetRequest, s
 
 func (c ConnectorContext) Move() error {
 
-	connectors, err := c.listConnectors(c.sourceOrg, c.sourceProject)
-	if err != nil {
-		return err
+	var connectors []*nextgen.ConnectorInfo
+	var err error
+	if c.sourceOrg == "" || c.sourceProject == "" {
+		// If there is no source org or project pull account level connectors
+		connectors, err = c.listAccountConnectors()
+		if err != nil {
+			return err
+		}
+	} else {
+		connectors, err = c.listConnectors(c.sourceOrg, c.sourceProject)
+		if err != nil {
+			return err
+		}
+
 	}
 
 	bar := progressbar.Default(int64(len(connectors)), "Connectors")
@@ -67,6 +78,44 @@ func (c ConnectorContext) listConnectors(org, project string) ([]*nextgen.Connec
 			"accountIdentifier":                    api.Account,
 			"orgIdentifier":                        org,
 			"projectIdentifier":                    project,
+			"size":                                 "1000",
+			"includeAllConnectorsAvailableAtScope": "false",
+		}).
+		SetBody(model.ListRequestBody{
+			FilterType: "Connector",
+		}).
+		Post(api.Url + "/ng/api/connectors/listV2")
+	if err != nil {
+		return nil, err
+	}
+	if resp.IsError() {
+		return nil, handleErrorResponse(resp)
+	}
+
+	result := model.ListConnectorResponse{}
+	err = json.Unmarshal(resp.Body(), &result)
+	if err != nil {
+		return nil, err
+	}
+
+	connectors := []*nextgen.ConnectorInfo{}
+	for _, conn := range result.Data.Content {
+		if !conn.HarnessManaged {
+			connectors = append(connectors, conn.Connector)
+		}
+	}
+
+	return connectors, nil
+}
+
+func (c ConnectorContext) listAccountConnectors() ([]*nextgen.ConnectorInfo, error) {
+
+	api := c.source
+	resp, err := api.Client.R().
+		SetHeader("x-api-key", api.Token).
+		SetHeader("Content-Type", "application/json").
+		SetQueryParams(map[string]string{
+			"accountIdentifier":                    api.Account,
 			"size":                                 "1000",
 			"includeAllConnectorsAvailableAtScope": "false",
 		}).
