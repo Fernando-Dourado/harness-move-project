@@ -52,6 +52,19 @@ type OperationFactory interface {
 func createYaml(yaml, sourceOrg, sourceProject, targetOrg, targetProject string) string {
 	var out string
 
+	if sourceOrg == "" && sourceProject == "" {
+		// find lines where orgIdentifier and projectIdentifier are present and remove them completely
+		lines := strings.Split(yaml, "\n")
+		var filteredLines []string
+
+		for _, line := range lines {
+			// Skip lines containing orgIdentifier or projectIdentifier
+			if !strings.Contains(line, "orgIdentifier:") && !strings.Contains(line, "projectIdentifier:") {
+				filteredLines = append(filteredLines, line)
+			}
+		}
+		return strings.Join(filteredLines, "\n")
+	}
 	if strings.Contains(yaml, "orgIdentifier: ") {
 		out = strings.ReplaceAll(yaml, "orgIdentifier: "+sourceOrg, "orgIdentifier: "+targetOrg)
 	} else {

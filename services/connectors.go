@@ -33,7 +33,7 @@ func (c ConnectorContext) Move() error {
 
 	var connectors []*nextgen.ConnectorInfo
 	var err error
-	if c.sourceOrg == "" || c.sourceProject == "" {
+	if c.sourceOrg == "" && c.sourceProject == "" {
 		// If there is no source org or project pull account level connectors
 		connectors, err = c.listAccountConnectors()
 		if err != nil {
