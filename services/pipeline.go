@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/Fernando-Dourado/harness-move-project/model"
 	"github.com/schollz/progressbar/v3"
@@ -117,6 +118,8 @@ func (c PipelineContext) getPipeline(org, project, pipeIdentifier string) (*mode
 }
 
 func (c PipelineContext) createPipeline(org, project, yaml string) error {
+
+	yaml = strings.ReplaceAll(yaml, "account.", "org.")
 
 	api := c.target
 	resp, err := api.Client.R().

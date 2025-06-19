@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/Fernando-Dourado/harness-move-project/model"
 	"github.com/schollz/progressbar/v3"
@@ -128,6 +129,8 @@ func (c InputsetContext) getInputset(org, project, pipelineIdentifier, isIdentif
 }
 
 func (c InputsetContext) createInputset(org, project, pipelineIdentifier, yaml string) error {
+
+	yaml = strings.ReplaceAll(yaml, "account.", "org.")
 
 	api := c.target
 	resp, err := api.Client.R().

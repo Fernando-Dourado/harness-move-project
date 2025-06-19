@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/Fernando-Dourado/harness-move-project/model"
 	"github.com/schollz/progressbar/v3"
@@ -104,6 +105,10 @@ func listInfraDef(s *SourceRequest, org, project, envId string) ([]*model.InfraD
 }
 
 func createInfrastructure(t *TargetRequest, infra *model.CreateInfrastructureRequest) error {
+
+	strConn, _ := json.Marshal(infra)
+	newConn := strings.ReplaceAll(string(strConn), "account.", "org.")
+	json.Unmarshal([]byte(newConn), &infra)
 
 	resp, err := t.Client.R().
 		SetHeader("x-api-key", t.Token).

@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/Fernando-Dourado/harness-move-project/model"
 	"github.com/schollz/progressbar/v3"
@@ -69,10 +70,10 @@ func listTemplates(s *SourceRequest, org, project string) (model.TemplateListRes
 	}
 
 	endpoint := LIST_TEMPLATES_ENDPOINT
-	if len(project) == 0 {
-		endpoint = "/v1/orgs/{org}/templates"
-	} else if len(org) == 0 {
+	if len(org) == 0 {
 		endpoint = "/v1/templates"
+	} else if len(project) == 0 {
+		endpoint = "/v1/orgs/{org}/templates"
 	} else {
 		endpoint = LIST_TEMPLATES_ENDPOINT
 	}
@@ -132,6 +133,8 @@ func (c TemplateContext) getTemplate(org, project, templateIdentifier, versionLa
 }
 
 func (c TemplateContext) createTemplate(org, project, yaml string) error {
+
+	yaml = strings.ReplaceAll(yaml, "account.", "org.")
 
 	params := createQueryParams(c.target.Account, org, project)
 
