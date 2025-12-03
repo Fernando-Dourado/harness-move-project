@@ -62,7 +62,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:     "target-token",
-			Usage:    "API authentication token for accessing the target system. Not needed if target and source accounts are the same.",
+			Usage:    "API authentication token for accessing the target system. Not needed if target and source accounts are the same. Use 'skip' to bypass validation in export mode.",
 			Required: false,
 		},
 		cli.StringFlag{
@@ -73,6 +73,16 @@ func main() {
 		cli.BoolFlag{
 			Name:     "create-project",
 			Usage:    "Creates the project in the target account/org if missing.",
+			Required: false,
+		},
+		cli.StringFlag{
+			Name:     "export-dir",
+			Usage:    "Export YAMLs to this directory instead of making API calls. If set, no resources will be created.",
+			Required: false,
+		},
+		cli.BoolFlag{
+			Name:     "skip-environments",
+			Usage:    "Skip creating environments. Useful when environments already exist in target.",
 			Required: false,
 		},
 	}
@@ -96,7 +106,9 @@ func run(c *cli.Context) {
 			Url:     c.String("vanity-url-target"),
 		},
 		operation.OperationConfig{
-			CreateProject: c.Bool("create-project"),
+			CreateProject:    c.Bool("create-project"),
+			ExportDir:        c.String("export-dir"),
+			SkipEnvironments: c.Bool("skip-environments"),
 		},
 	)
 
@@ -113,12 +125,22 @@ func applyArgumentRules(mv *operation.Move) {
 	if len(mv.Target.Project) == 0 {
 		mv.Target.Project = mv.Source.Project
 	}
-	// USE TOKEN AND ACCOUNT FROM SOURCE, WHEN TARGET NOT SET
-	if len(mv.Target.Token) == 0 {
-		mv.Target.Token = mv.Source.Token
-	}
-	if len(mv.Target.Account) == 0 {
-		mv.Target.Account = mv.Source.Account
+	// IN EXPORT MODE, USE 'skip' AS DEFAULT TARGET TOKEN/ACCOUNT IF NOT PROVIDED
+	if len(mv.Config.ExportDir) > 0 {
+		if len(mv.Target.Token) == 0 {
+			mv.Target.Token = "skip"
+		}
+		if len(mv.Target.Account) == 0 {
+			mv.Target.Account = "skip"
+		}
+	} else {
+		// USE TOKEN AND ACCOUNT FROM SOURCE, WHEN TARGET NOT SET (NORMAL MODE)
+		if len(mv.Target.Token) == 0 {
+			mv.Target.Token = mv.Source.Token
+		}
+		if len(mv.Target.Account) == 0 {
+			mv.Target.Account = mv.Source.Account
+		}
 	}
 	// USE DEFAULT BASEURL WHEN URL'S ARE NOT PROVIDED
 	if len(mv.Target.Url) == 0 {

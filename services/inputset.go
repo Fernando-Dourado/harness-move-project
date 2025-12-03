@@ -16,6 +16,7 @@ type InputsetContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	exportDir     string
 }
 
 func NewInputsetOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) InputsetContext {
@@ -26,6 +27,7 @@ func NewInputsetOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st
 		sourceProject: st.SourceProject,
 		targetOrg:     st.TargetOrg,
 		targetProject: st.TargetProject,
+		exportDir:     st.ExportDir,
 	}
 }
 
@@ -51,8 +53,16 @@ func (c InputsetContext) Move() error {
 		for _, inputset := range inputsets {
 			is, err := c.getInputset(c.sourceOrg, c.sourceProject, pipeline.Identifier, inputset.Identifier)
 			if err == nil {
-				newYaml := createYaml(is.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
-				err = c.createInputset(c.targetOrg, c.targetProject, pipeline.Identifier, newYaml)
+				newYaml := createYaml(is.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject, c.source.Account, c.target.Account)
+				
+				// Check if export mode is enabled
+				if isExportMode(c.exportDir) {
+					// Save YAML string directly to file
+					err = saveStringToYAML(c.exportDir, "inputsets", pipeline.Identifier+"_"+inputset.Identifier, newYaml)
+				} else {
+					// Make API call to create inputset
+					err = c.createInputset(c.targetOrg, c.targetProject, pipeline.Identifier, newYaml)
+				}
 			}
 			if err != nil {
 				failed = append(failed, fmt.Sprintln(pipeline.Name, "/", err.Error()))

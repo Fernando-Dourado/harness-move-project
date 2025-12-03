@@ -15,6 +15,7 @@ type ServiceOverrideContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	exportDir     string
 }
 
 func NewServiceOverrideOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) ServiceOverrideContext {
@@ -25,6 +26,7 @@ func NewServiceOverrideOperation(sourceApi *SourceRequest, targetApi *TargetRequ
 		sourceProject: st.SourceProject,
 		targetOrg:     st.TargetOrg,
 		targetProject: st.TargetProject,
+		exportDir:     st.ExportDir,
 	}
 }
 
@@ -52,13 +54,24 @@ func (c ServiceOverrideContext) Move() error {
 			if len(o.YAML) == 0 {
 				failed = append(failed, fmt.Sprintf("The YAML is empty [envId=%s,serviceRef=%s]", o.EnvironmentRef, o.ServiceRef))
 			} else {
-				err := createServiceOverride(c.target, &model.CreateServiceOverrideRequest{
+				newYaml := createYaml(o.YAML, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject, c.source.Account, c.target.Account)
+				req := &model.CreateServiceOverrideRequest{
 					OrgIdentifier:     c.targetOrg,
 					ProjectIdentifier: c.targetProject,
 					EnvironmentRef:    o.EnvironmentRef,
 					ServiceRef:        o.ServiceRef,
-					YAML:              o.YAML,
-				})
+					YAML:              newYaml,
+				}
+
+				var err error
+				if isExportMode(c.exportDir) {
+					// Save YAML string directly to file
+					err = saveStringToYAML(c.exportDir, "service-overrides-v1", o.EnvironmentRef+"_"+o.ServiceRef, newYaml)
+				} else {
+					// Make API call to create service override
+					err = createServiceOverride(c.target, req)
+				}
+
 				if err != nil {
 					failed = append(failed, fmt.Sprintln(e.Name, "/", o.ServiceRef, "-", err.Error()))
 				}

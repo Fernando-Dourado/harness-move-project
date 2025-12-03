@@ -18,6 +18,7 @@ type ServiceContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	exportDir     string
 }
 
 func NewServiceOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) ServiceContext {
@@ -28,6 +29,7 @@ func NewServiceOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st 
 		sourceProject: st.SourceProject,
 		targetOrg:     st.TargetOrg,
 		targetProject: st.TargetProject,
+		exportDir:     st.ExportDir,
 	}
 }
 
@@ -42,7 +44,7 @@ func (c ServiceContext) Move() error {
 	var failed []string
 
 	for _, s := range services {
-		newYaml := createYaml(s.Service.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
+		newYaml := createYaml(s.Service.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject, c.source.Account, c.target.Account)
 		service := &model.CreateServiceRequest{
 			OrgIdentifier:     c.targetOrg,
 			ProjectIdentifier: c.targetProject,
@@ -51,7 +53,17 @@ func (c ServiceContext) Move() error {
 			Description:       s.Service.Description,
 			Yaml:              newYaml,
 		}
-		if err := createService(c.target, service); err != nil {
+		
+		var err error
+		if isExportMode(c.exportDir) {
+			// Save YAML string directly to file
+			err = saveStringToYAML(c.exportDir, "services", s.Service.Identifier, newYaml)
+		} else {
+			// Make API call to create service
+			err = createService(c.target, service)
+		}
+		
+		if err != nil {
 			failed = append(failed, fmt.Sprintln(s.Service.Name, "-", err.Error()))
 		}
 		bar.Add(1)

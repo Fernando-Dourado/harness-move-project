@@ -16,6 +16,7 @@ type InfrastructureContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	exportDir     string
 }
 
 func NewInfrastructureOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) InfrastructureContext {
@@ -26,6 +27,7 @@ func NewInfrastructureOperation(sourceApi *SourceRequest, targetApi *TargetReque
 		sourceProject: st.SourceProject,
 		targetOrg:     st.TargetOrg,
 		targetProject: st.TargetProject,
+		exportDir:     st.ExportDir,
 	}
 }
 
@@ -51,9 +53,9 @@ func (c InfrastructureContext) Move() error {
 
 		for _, infra := range infras {
 			i := infra.Infrastructure
-			newYaml := createYaml(i.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
+			newYaml := createYaml(i.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject, c.source.Account, c.target.Account)
 
-			err := createInfrastructure(c.target, &model.CreateInfrastructureRequest{
+			req := &model.CreateInfrastructureRequest{
 				Name:              i.Name,
 				Identifier:        i.Identifier,
 				OrgIdentifier:     c.targetOrg,
@@ -63,7 +65,17 @@ func (c InfrastructureContext) Move() error {
 				DeploymentType:    i.DeploymentType,
 				Type:              i.Type,
 				Yaml:              newYaml,
-			})
+			}
+			
+			var err error
+			if isExportMode(c.exportDir) {
+				// Save YAML string directly to file
+				err = saveStringToYAML(c.exportDir, "infrastructures", e.Identifier+"_"+i.Identifier, newYaml)
+			} else {
+				// Make API call to create infrastructure
+				err = createInfrastructure(c.target, req)
+			}
+			
 			if err != nil {
 				failed = append(failed, fmt.Sprintln(e.Name, "/", i.Name, "-", err.Error()))
 			}

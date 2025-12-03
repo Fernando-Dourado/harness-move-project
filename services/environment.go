@@ -18,6 +18,7 @@ type EnvironmentContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	exportDir     string
 }
 
 func NewEnvironmentOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) EnvironmentContext {
@@ -28,6 +29,7 @@ func NewEnvironmentOperation(sourceApi *SourceRequest, targetApi *TargetRequest,
 		sourceProject: st.SourceProject,
 		targetOrg:     st.TargetOrg,
 		targetProject: st.TargetProject,
+		exportDir:     st.ExportDir,
 	}
 }
 
@@ -44,7 +46,7 @@ func (c EnvironmentContext) Move() error {
 	for _, env := range envs {
 		e := env.Environment
 
-		newYaml := createYaml(sanitizeEnvYaml(e.Yaml), c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
+		newYaml := createYaml(sanitizeEnvYaml(e.Yaml), c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject, c.source.Account, c.target.Account)
 
 		var descriptionToUse string
 		if e.Description != nil {
@@ -61,7 +63,18 @@ func (c EnvironmentContext) Move() error {
 			Type:              e.Type,
 			Yaml:              newYaml,
 		}
-		if err := createEnvironment(c.target, req); err != nil {
+		
+		// Check if export mode is enabled
+		var err error
+		if isExportMode(c.exportDir) {
+			// Save YAML string directly to file
+			err = saveStringToYAML(c.exportDir, "environments", e.Identifier, newYaml)
+		} else {
+			// Make API call to create environment
+			err = createEnvironment(c.target, req)
+		}
+		
+		if err != nil {
 			failed = append(failed, fmt.Sprintln(e.Name, "-", err.Error()))
 		}
 		bar.Add(1)

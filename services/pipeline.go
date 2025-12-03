@@ -20,6 +20,7 @@ type PipelineContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	exportDir     string
 }
 
 func NewPipelineOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) PipelineContext {
@@ -30,6 +31,7 @@ func NewPipelineOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st
 		sourceProject: st.SourceProject,
 		targetOrg:     st.TargetOrg,
 		targetProject: st.TargetProject,
+		exportDir:     st.ExportDir,
 	}
 }
 
@@ -46,8 +48,16 @@ func (c PipelineContext) Move() error {
 	for _, pipe := range pipelines {
 		pipeData, err := c.getPipeline(c.sourceOrg, c.sourceProject, pipe.Identifier)
 		if err == nil {
-			newYaml := createYaml(pipeData.YAMLPipeline, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
-			err = c.createPipeline(c.targetOrg, c.targetProject, newYaml)
+			newYaml := createYaml(pipeData.YAMLPipeline, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject, c.source.Account, c.target.Account)
+			
+			// Check if export mode is enabled
+			if isExportMode(c.exportDir) {
+				// Save YAML string directly to file
+				err = saveStringToYAML(c.exportDir, "pipelines", pipe.Identifier, newYaml)
+			} else {
+				// Make API call to create pipeline
+				err = c.createPipeline(c.targetOrg, c.targetProject, newYaml)
+			}
 		}
 		if err != nil {
 			failed = append(failed, fmt.Sprintln(pipe.Name, "-", err.Error()))

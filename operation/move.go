@@ -11,7 +11,9 @@ import (
 
 type (
 	OperationConfig struct {
-		CreateProject bool
+		CreateProject    bool
+		ExportDir        string
+		SkipEnvironments bool
 	}
 
 	CopyConfig struct {
@@ -54,13 +56,17 @@ func (o *Move) Exec() error {
 		Url:     o.Target.Url,
 	}
 
-	// SOURCE AND TARGET MUST EXIST
+	// SOURCE MUST EXIST
 	if err := sourceApi.ValidateSource(o.Source.Org, o.Source.Project); err != nil {
 		return err
 	}
-	if err := targetApi.ValidateTarget(o.Target.Org, o.Target.Project); err != nil {
-		if err = o.createProjectWhenRequired(&sourceApi, &targetApi, err); err != nil {
-			return err
+
+	// SKIP TARGET VALIDATION IF IN EXPORT MODE OR TOKEN IS 'skip'
+	if o.Target.Token != "skip" && o.Config.ExportDir == "" {
+		if err := targetApi.ValidateTarget(o.Target.Org, o.Target.Project); err != nil {
+			if err = o.createProjectWhenRequired(&sourceApi, &targetApi, err); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -69,6 +75,7 @@ func (o *Move) Exec() error {
 		SourceProject: o.Source.Project,
 		TargetOrg:     o.Target.Org,
 		TargetProject: o.Target.Project,
+		ExportDir:     o.Config.ExportDir,
 	}
 
 	var operations []services.Operation
@@ -76,7 +83,9 @@ func (o *Move) Exec() error {
 	operations = append(operations, services.NewSecretOperation(&sourceApi, &targetApi, st))
 	operations = append(operations, services.NewConnectorOperation(&sourceApi, &targetApi, st))
 	operations = append(operations, services.NewFileStoreOperation(&sourceApi, &targetApi, st))
-	operations = append(operations, services.NewEnvironmentOperation(&sourceApi, &targetApi, st))
+	if !o.Config.SkipEnvironments {
+		operations = append(operations, services.NewEnvironmentOperation(&sourceApi, &targetApi, st))
+	}
 	operations = append(operations, services.NewInfrastructureOperation(&sourceApi, &targetApi, st))
 	operations = append(operations, services.NewServiceOperation(&sourceApi, &targetApi, st))
 	operations = append(operations, services.NewServiceOverrideOperation(&sourceApi, &targetApi, st))

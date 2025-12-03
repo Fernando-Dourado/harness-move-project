@@ -18,6 +18,7 @@ type SecretContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	exportDir     string
 }
 
 func NewSecretOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) SecretContext {
@@ -28,6 +29,7 @@ func NewSecretOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *
 		sourceProject: st.SourceProject,
 		targetOrg:     st.TargetOrg,
 		targetProject: st.TargetProject,
+		exportDir:     st.ExportDir,
 	}
 }
 
@@ -55,7 +57,15 @@ func (sc SecretContext) Move() error {
 		secret.OrgIdentifier = sc.targetOrg
 		secret.ProjectIdentifier = sc.targetProject
 
-		err = sc.createSecret(secret)
+		// Check if export mode is enabled
+		if isExportMode(sc.exportDir) {
+			// Save to YAML file instead of making API call
+			err = saveToYAML(sc.exportDir, "secrets", secret.Identifier, secret)
+		} else {
+			// Make API call to create secret
+			err = sc.createSecret(secret)
+		}
+		
 		if err != nil {
 			failed = append(failed, fmt.Sprintln(secret.Name, "-", err.Error()))
 		}

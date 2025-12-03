@@ -15,6 +15,7 @@ type VariableContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	exportDir     string
 }
 
 func NewVariableOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) VariableContext {
@@ -25,6 +26,7 @@ func NewVariableOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st
 		sourceProject: st.SourceProject,
 		targetOrg:     st.TargetOrg,
 		targetProject: st.TargetProject,
+		exportDir:     st.ExportDir,
 	}
 }
 
@@ -42,9 +44,17 @@ func (c VariableContext) Move() error {
 		v.OrgIdentifier = c.targetOrg
 		v.ProjectIdentifier = c.targetProject
 
-		err = c.createVariable(&model.CreateVariableRequest{
-			Variable: v,
-		})
+		// Check if export mode is enabled
+		if isExportMode(c.exportDir) {
+			// Save to YAML file instead of making API call
+			err = saveToYAML(c.exportDir, "variables", v.Identifier, v)
+		} else {
+			// Make API call to create variable
+			err = c.createVariable(&model.CreateVariableRequest{
+				Variable: v,
+			})
+		}
+		
 		if err != nil {
 			failed = append(failed, fmt.Sprintln(v.Name, "-", err.Error()))
 		}

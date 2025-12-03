@@ -20,6 +20,7 @@ type TemplateContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	exportDir     string
 }
 
 func NewTemplateOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) TemplateContext {
@@ -30,6 +31,7 @@ func NewTemplateOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st
 		sourceProject: st.SourceProject,
 		targetOrg:     st.TargetOrg,
 		targetProject: st.TargetProject,
+		exportDir:     st.ExportDir,
 	}
 }
 
@@ -46,8 +48,16 @@ func (c TemplateContext) Move() error {
 	for _, template := range templates {
 		t, err := c.getTemplate(c.sourceOrg, c.sourceProject, template.Identifier, template.VersionLabel)
 		if err == nil {
-			newYaml := createYaml(t.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject)
-			err = c.createTemplate(c.targetOrg, c.targetProject, newYaml)
+			newYaml := createYaml(t.Yaml, c.sourceOrg, c.sourceProject, c.targetOrg, c.targetProject, c.source.Account, c.target.Account)
+			
+			// Check if export mode is enabled
+			if isExportMode(c.exportDir) {
+				// Save YAML string directly to file
+				err = saveStringToYAML(c.exportDir, "templates", template.Identifier+"_"+template.VersionLabel, newYaml)
+			} else {
+				// Make API call to create template
+				err = c.createTemplate(c.targetOrg, c.targetProject, newYaml)
+			}
 		}
 		if err != nil {
 			failed = append(failed, fmt.Sprintln(template.Name, "-", err.Error()))

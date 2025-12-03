@@ -15,6 +15,7 @@ type OverrideV2Context struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	exportDir     string
 }
 
 func NewOverrideV2Operation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) OverrideV2Context {
@@ -25,6 +26,7 @@ func NewOverrideV2Operation(sourceApi *SourceRequest, targetApi *TargetRequest, 
 		sourceProject: st.SourceProject,
 		targetOrg:     st.TargetOrg,
 		targetProject: st.TargetProject,
+		exportDir:     st.ExportDir,
 	}
 }
 
@@ -53,10 +55,20 @@ func (c OverrideV2Context) Move() error {
 			if err != nil {
 				failed = append(failed, fmt.Sprintln("Unable to get override type", overrideType, "identifier", id, "-", err.Error()))
 			} else {
+				override.AccountId = c.target.Account
 				override.OrgIdentifier = c.targetOrg
 				override.ProjectIdentifier = c.targetProject
 
-				if err = c.createOverride(override); err != nil {
+				// Check if export mode is enabled
+				if isExportMode(c.exportDir) {
+					// Save to YAML file instead of making API call
+					err = saveToYAML(c.exportDir, "service-overrides-v2", override.Identifier, override)
+				} else {
+					// Make API call to create override
+					err = c.createOverride(override)
+				}
+				
+				if err != nil {
 					failed = append(failed, fmt.Sprintln("Unable to create override type", override.Type, "identifier", override.Identifier, "-", err.Error()))
 				}
 			}

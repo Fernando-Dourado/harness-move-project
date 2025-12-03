@@ -18,6 +18,7 @@ type ConnectorContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	exportDir     string
 }
 
 func NewConnectorOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) ConnectorContext {
@@ -28,6 +29,7 @@ func NewConnectorOperation(sourceApi *SourceRequest, targetApi *TargetRequest, s
 		sourceProject: st.SourceProject,
 		targetOrg:     st.TargetOrg,
 		targetProject: st.TargetProject,
+		exportDir:     st.ExportDir,
 	}
 }
 
@@ -60,9 +62,17 @@ func (c ConnectorContext) Move() error {
 		newConn := strings.ReplaceAll(string(strConn), "account.", "org.")
 		json.Unmarshal([]byte(newConn), &conn)
 
-		err = c.createConnector(&model.CreateConnectorRequest{
-			Connector: conn,
-		})
+		// Check if export mode is enabled
+		if isExportMode(c.exportDir) {
+			// Save to YAML file instead of making API call
+			err = saveToYAML(c.exportDir, "connectors", conn.Identifier, conn)
+		} else {
+			// Make API call to create connector
+			err = c.createConnector(&model.CreateConnectorRequest{
+				Connector: conn,
+			})
+		}
+		
 		if err != nil {
 			failed = append(failed, fmt.Sprintln(conn.Name, "-", err.Error()))
 		}

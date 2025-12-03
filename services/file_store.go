@@ -18,6 +18,7 @@ type FileStoreContext struct {
 	sourceProject string
 	targetOrg     string
 	targetProject string
+	exportDir     string
 }
 
 func NewFileStoreOperation(sourceApi *SourceRequest, targetApi *TargetRequest, st *SourceTarget) FileStoreContext {
@@ -28,6 +29,7 @@ func NewFileStoreOperation(sourceApi *SourceRequest, targetApi *TargetRequest, s
 		sourceProject: st.SourceProject,
 		targetOrg:     st.TargetOrg,
 		targetProject: st.TargetProject,
+		exportDir:     st.ExportDir,
 	}
 }
 
@@ -92,12 +94,25 @@ func (c FileStoreContext) createNode(n *model.FileStoreNode) error {
 
 	switch n.Type {
 	case model.Folder:
+		// In export mode, save folder metadata
+		if isExportMode(c.exportDir) {
+			return saveToYAML(c.exportDir, "file-store/folders", n.Path, n)
+		}
 		return c.createFolder(n)
 	case model.File:
 		// DOWNLOAD FILE
 		b, err := c.downloadFile(n)
 		if err != nil {
 			return err
+		}
+
+		// In export mode, save file metadata and content
+		if isExportMode(c.exportDir) {
+			if err := saveToYAML(c.exportDir, "file-store/files", n.Path, n); err != nil {
+				return err
+			}
+			// Note: File content saved as metadata; actual binary content not exported
+			return nil
 		}
 
 		// CREATE/UPLOAD FILE
